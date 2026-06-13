@@ -10,7 +10,7 @@ import {
 } from "../controllers/product.controller.js";
 
 import upload from "../middleware/upload.js";
-import { protectAdmin } from "../middleware/admin.middleware.js";
+import { protectAdmin } from "../middlewares/admin.middleware.js";
 
 const router = express.Router();
 
