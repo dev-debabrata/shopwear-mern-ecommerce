@@ -49,10 +49,10 @@ const Footer = () => {
             <img
               src="/shopwear.png"
               alt="ShopWear Logo"
-              className="w-8 h-8 object-contain brightness-0"
+              className=" w-6 h-6 md:w-8 md:h-8 object-contain brightness-0"
             />
 
-            <h1 className="text-[30px] font-semibold">
+            <h1 className="md:text-[30px] text-lg  font-semibold">
               ShopWear
             </h1>
           </Link>

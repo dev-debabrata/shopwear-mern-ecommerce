@@ -18,6 +18,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import WishlistPage from "./pages/WishlistPage";
 import { useAppContext } from "./context/AppContext";
+import ProfilePage from "./pages/ProfilePage";
+import OrderSuccessPage from "./pages/OrderSuccessPage";
 
 
 function ScrollToTop() {
@@ -62,12 +64,15 @@ function App() {
         {/* Auth routes — redirect to home if already logged in */}
         <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to="/" />} />
 
+
         {/* Protected routes — redirect to signup if not logged in */}
-        <Route path="/wishlist" element={user ? <WishlistPage /> : <Navigate to="/signup" />} />
-        <Route path="/cart" element={user ? <CartPage /> : <Navigate to="/signup" />} />
-        <Route path="/checkout" element={user ? <Checkout /> : <Navigate to="/signup" />} />
-        <Route path="/orders" element={user ? <Orders /> : <Navigate to="/signup" />} />
-        <Route path="/trackorder/:_id" element={user ? <TrackOrderPage /> : <Navigate to="/signup" />} />
+        <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/signup?mode=login" />} />
+        <Route path="/wishlist" element={user ? <WishlistPage /> : <Navigate to="/signup?mode=login" />} />
+        <Route path="/cart" element={user ? <CartPage /> : <Navigate to="/signup?mode=login" />} />
+        <Route path="/checkout" element={user ? <Checkout /> : <Navigate to="/signup?mode=login" />} />
+        <Route path="/orders" element={user ? <Orders /> : <Navigate to="/signup?mode=login" />} />
+        <Route path="/order-success" element={user ? <OrderSuccessPage /> : <Navigate to="/signup?mode=login" />} />
+        <Route path="/trackorder/:_id" element={user ? <TrackOrderPage /> : <Navigate to="/signup?mode=login" />} />
       </Routes>
       <Footer />
     </>

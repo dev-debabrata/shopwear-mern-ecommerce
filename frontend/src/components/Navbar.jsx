@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, Search, ShoppingCart } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 
 import Container from "../layout/Container";
+import SearchItem from "./SearchItem";
 
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
@@ -100,10 +102,10 @@ const Navbar = () => {
           <img
             src="/shopwear.png"
             alt="ShopWear Logo"
-            className="w-8 h-8 object-contain brightness-0"
+            className=" w-6 h-6 md:w-8 md:h-8 object-contain brightness-0"
           />
 
-          <h1 className="text-[30px] font-semibold">
+          <h1 className="md:text-[30px] text-lg  font-semibold">
             ShopWear
           </h1>
         </Link>
@@ -158,13 +160,10 @@ const Navbar = () => {
           </NavLink>
         </ul>
 
-        <div className="flex gap-6 items-center">
-          <button type="button" onClick={() => setIsSearchBarOpen(true)}>
-            <img
-              src="/images/search.png"
-              className="w-5 cursor-pointer"
-              alt="search-icon"
-            />
+        <div className="flex gap-4 md:gap-6 items-center">
+          <button type="button" onClick={() => setIsSearchBarOpen(true)} className=" cursor-pointer">
+            <Search />
+
           </button>
 
           <button
@@ -250,7 +249,7 @@ const Navbar = () => {
           ) : (
             <Link
               to="/signup?mode=login"
-              className="border border-black px-4 py-2 text-black hover:bg-black hover:text-white transition-all duration-300"
+              className="border border-black text-[12px] px-2 py-1 md:text-base md:px-4 md:py-2 text-black hover:bg-black hover:text-white transition-all duration-300"
             >
               Login
             </Link>
@@ -328,6 +327,8 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {location.pathname !== "/collection" && <SearchItem />}
     </Container>
   );
 };

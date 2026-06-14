@@ -1,6 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { Heart } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import { axiosInstance } from "../utils/axios";
 import { useAppContext } from "../context/AppContext";
 
@@ -8,17 +8,19 @@ import Container from "../layout/Container";
 import Title from "../components/Title";
 import Button from "../components/Button";
 import Input from "../components/Input";
-// import LoadingSpinner from "../components/LoadingSpinner";
 import Loading from "../components/Loading";
 import ProductItem from "../components/ProductItem";
+import { Search, X } from "lucide-react";
 
 const CollectionsPage = () => {
   const [products, setProducts] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
   const [sortValue, setSortValue] = useState("name-asc");
   const [searchInput, setSearchInput] = useState("");
+  const [showFilter, setShowFilter] = useState(false);
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { isSearchBarOpen, setIsSearchBarOpen, addToWishlist, isInWishlist } =
     useAppContext();
@@ -55,6 +57,23 @@ const CollectionsPage = () => {
 
     fetchProducts();
   }, []);
+
+
+  useEffect(() => {
+    const search = searchParams.get("search") || "";
+    setSearchInput(search);
+  }, [searchParams]);
+
+
+  const handleSearch = () => {
+    if (!searchInput.trim()) {
+      setSearchParams({});
+      return;
+    }
+
+    setSearchParams({ search: searchInput.trim() });
+    setIsSearchBarOpen(false);
+  };
 
   // useEffect(() => {
   //   const fetchProducts = async () => {
@@ -154,7 +173,21 @@ const CollectionsPage = () => {
     });
 
     setSearchInput("");
+    setSearchParams({});
   };
+
+  // const clearFilters = () => {
+  //   setCheckedBox({
+  //     Men: false,
+  //     Women: false,
+  //     Kids: false,
+  //     Topwear: false,
+  //     Bottomwear: false,
+  //     Winterwear: false,
+  //   });
+
+  //   setSearchInput("");
+  // };
 
   const checkboxItems = [
     "Men",
@@ -177,32 +210,72 @@ const CollectionsPage = () => {
               inputClassName="text-sm bg-inherit border-0 outline-none text-gray-700 z-50"
               placeholder="Search..."
               onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
             />
 
-            <img src="/images/search.png" className="w-4" alt="search icon" />
-          </div>
+            <button
+              className="w-4 text-gray-500"
+              onClick={handleSearch}>
+              <Search size={20} />
+            </button>
 
-          <img
+            {/* <img src="/images/search.png" className="w-4" alt="search icon" onClick={handleSearch} /> */}
+          </div >
+
+          <button
+            className="w-3 cursor-pointer  text-gray-500"
+            onClick={() => {
+              setSearchInput("");
+              setSearchParams({});
+              setIsSearchBarOpen(false);
+            }}>
+            <X size={20} />
+          </button>
+
+          {/* <img
             src="/images/search-close.png"
             className="w-3 cursor-pointer"
             alt="search-close"
-            onClick={() => setIsSearchBarOpen(false)}
-          />
+            onClick={() => {
+              setSearchInput("");
+              setSearchParams({});
+              setIsSearchBarOpen(false);
+            }}
+          /> */}
         </div>
       )}
 
       <div className="flex flex-col pt-10 border-t border-gray-200 gap-1 sm:gap-10 sm:flex-row">
         <div className="min-w-60">
-          <p className="flex gap-2 items-center text-xl my-2 cursor-pointer">
+          <p
+            onClick={() => setShowFilter((prev) => !prev)}
+            className="flex gap-2 items-center text-xl my-2 cursor-pointer"
+          >
+            FILTERS
+            <img
+              src="/images/back-arrow.png"
+              className={`h-3 sm:hidden transition-transform ${showFilter ? "rotate-90" : ""
+                }`}
+              alt="back-arrow"
+            />
+          </p>
+
+          {/* <p className="flex gap-2 items-center text-xl my-2 cursor-pointer">
             FILTERS
             <img
               src="/images/back-arrow.png"
               className="h-3 sm:hidden"
               alt="back-arrow"
             />
-          </p>
+          </p> */}
 
-          <div className="hidden sm:block border pl-5 py-3 mt-6 border-gray-300">
+          {/* <div className="hidden sm:block border pl-5 py-3 mt-6 border-gray-300"> */}
+          <div
+            className={`border pl-5 py-3 mt-6 border-gray-300 ${showFilter ? "block" : "hidden"
+              } sm:block`}
+          >
             <p className="font-medium mb-3 text-sm">CATEGORIES</p>
 
             <div className="flex flex-col gap-2 text-gray-700 text-sm font-light">
@@ -220,7 +293,11 @@ const CollectionsPage = () => {
             </div>
           </div>
 
-          <div className="hidden sm:block gap-2 border pl-5 py-3 my-5 mt-6 border-gray-300 text-sm">
+          {/* <div className="hidden sm:block gap-2 border pl-5 py-3 my-5 mt-6 border-gray-300 text-sm"> */}
+          <div
+            className={`gap-2 border pl-5 py-3 my-5 mt-6 border-gray-300 text-sm ${showFilter ? "block" : "hidden"
+              } sm:block`}
+          >
             <p className="font-medium mb-3 text-sm">TYPES</p>
 
             <div className="flex flex-col gap-2 text-gray-700 text-sm font-light">
@@ -242,7 +319,7 @@ const CollectionsPage = () => {
             onClick={clearFilters}
             type="primary"
             size="small"
-            className="hidden sm:block mt-1 rounded px-4"
+            className={`${showFilter ? "block" : "hidden"} sm:block mt-1 rounded px-4`}
           >
             Clear Filters
           </Button>

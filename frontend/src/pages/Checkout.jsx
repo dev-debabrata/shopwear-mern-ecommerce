@@ -11,11 +11,13 @@ import { toast } from "react-toastify";
 import { deliveryFields } from "../data/checkoutData";
 import { useNavigate } from "react-router-dom";
 import { createRazorpayOrder } from "../services/paymentService";
+import { createOrder } from "../services/orderService";
 
 
 
 const Checkout = () => {
-  const { subTotal } = useAppContext();
+  const { subTotal, cartItems, setCartItems } = useAppContext();
+  // const { subTotal } = useAppContext();
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const navigate = useNavigate();
 
@@ -54,6 +56,7 @@ const Checkout = () => {
 
       const data = await createRazorpayOrder(totalAmount);
 
+
       const options = {
         key: data.key,
         amount: data.order.amount,
@@ -62,9 +65,17 @@ const Checkout = () => {
         description: "Order Payment",
         order_id: data.order.id,
 
-        handler: function () {
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true,
+        },
+
+        handler: async function (response) {
+          await saveOrder("paid", response);
           toast.success("Payment Successful");
-          navigate("/orders");
+          navigate("/order-success");
         },
 
         prefill: {
@@ -78,6 +89,36 @@ const Checkout = () => {
         },
       };
 
+      // const options = {
+      //   key: data.key,
+      //   amount: data.order.amount,
+      //   currency: data.order.currency,
+      //   name: "ShopWear Store",
+      //   description: "Order Payment",
+      //   order_id: data.order.id,
+
+
+      //   handler: async function () {
+      //     await saveOrder("paid");
+      //     toast.success("Payment Successful");
+      //     navigate("/order-success");
+      //   },
+      //   // handler: function () {
+      //   //   toast.success("Payment Successful");
+      //   //   navigate("/orders");
+      //   // },
+
+      //   prefill: {
+      //     name: `${formData.firstName} ${formData.lastName}`,
+      //     email: formData.emailAddress,
+      //     contact: `91${formData.mobile}`,
+      //   },
+
+      //   theme: {
+      //     color: "#000000",
+      //   },
+      // };
+
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
@@ -90,8 +131,9 @@ const Checkout = () => {
     e.preventDefault();
 
     if (paymentMethod === "cod") {
+      await saveOrder("pending");
       toast.success("Order placed successfully");
-      navigate("/orders");
+      navigate("/order-success");
       return;
     }
 
@@ -105,6 +147,97 @@ const Checkout = () => {
     }
   };
 
+
+  const saveOrder = async (
+    paymentStatus = "pending",
+    paymentInfo = null
+  ) => {
+    const orderData = {
+      items: cartItems.map((item) => ({
+        productId: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.size,
+        image: Array.isArray(item.image)
+          ? item.image[0]
+          : item.image,
+      })),
+
+      address: formData,
+
+      paymentMethod,
+      paymentStatus,
+
+      razorpayPaymentId:
+        paymentInfo?.razorpay_payment_id || "",
+
+      razorpayOrderId:
+        paymentInfo?.razorpay_order_id || "",
+
+      razorpaySignature:
+        paymentInfo?.razorpay_signature || "",
+
+      subTotal,
+      shippingFee,
+      totalAmount: subTotal + shippingFee,
+    };
+
+    await createOrder(orderData);
+
+    setCartItems([]);
+    localStorage.removeItem("cartItems");
+  };
+
+
+  // const saveOrder = async (paymentStatus = "pending") => {
+  //   const orderData = {
+  //     items: cartItems.map((item) => ({
+  //       productId: item._id,
+  //       name: item.name,
+  //       price: item.price,
+  //       quantity: item.quantity,
+  //       size: item.size,
+  //       image: Array.isArray(item.image) ? item.image[0] : item.image,
+  //     })),
+  //     address: formData,
+  //     paymentMethod,
+  //     paymentStatus,
+  //     subTotal,
+  //     shippingFee,
+  //     totalAmount: subTotal + shippingFee,
+  //   };
+
+  //   await createOrder(orderData);
+
+  //   setCartItems([]);
+  //   localStorage.removeItem("cartItems");
+  // };
+
+
+  // const saveOrder = async (paymentStatus = "pending") => {
+  //   const orderData = {
+  //     items: cartItems.map((item) => ({
+  //       productId: item._id,
+  //       name: item.name,
+  //       price: item.price,
+  //       quantity: item.quantity,
+  //       size: item.size,
+  //       image: item.images?.[0],
+  //     })),
+  //     address: formData,
+  //     paymentMethod,
+  //     paymentStatus,
+  //     subTotal,
+  //     shippingFee,
+  //     totalAmount: subTotal + shippingFee,
+  //   };
+
+  //   await createOrder(orderData);
+
+  //   setCartItems([]);
+  //   localStorage.removeItem("cartItems");
+  // };
 
 
 

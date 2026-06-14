@@ -7,10 +7,20 @@ export const createOrder = async (req, res) => {
             address,
             paymentMethod,
             paymentStatus,
+            razorpayPaymentId,
+            razorpayOrderId,
+            razorpaySignature,
             subTotal,
             shippingFee,
             totalAmount,
         } = req.body;
+
+        if (!items || items.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Order items are required",
+            });
+        }
 
         const order = await Order.create({
             userId: req.user._id,
@@ -18,6 +28,11 @@ export const createOrder = async (req, res) => {
             address,
             paymentMethod,
             paymentStatus,
+
+            razorpayPaymentId: razorpayPaymentId || "",
+            razorpayOrderId: razorpayOrderId || "",
+            razorpaySignature: razorpaySignature || "",
+
             subTotal,
             shippingFee,
             totalAmount,
@@ -29,6 +44,8 @@ export const createOrder = async (req, res) => {
             order,
         });
     } catch (error) {
+        console.log("Order create error:", error);
+
         res.status(500).json({
             success: false,
             message: "Order create failed",
@@ -47,6 +64,8 @@ export const getMyOrders = async (req, res) => {
             orders,
         });
     } catch (error) {
+        console.log("Get my orders error:", error);
+
         res.status(500).json({
             success: false,
             message: "Failed to get orders",
@@ -65,9 +84,43 @@ export const getAllOrders = async (req, res) => {
             orders,
         });
     } catch (error) {
+        console.log("Get all orders error:", error);
+
         res.status(500).json({
             success: false,
             message: "Failed to get all orders",
+        });
+    }
+};
+
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderStatus } = req.body;
+
+        const order = await Order.findByIdAndUpdate(
+            req.params.id,
+            { orderStatus },
+            { returnDocument: "after" }
+        );
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found",
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Order status updated",
+            order,
+        });
+    } catch (error) {
+        console.log("Update order status error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to update order status",
         });
     }
 };

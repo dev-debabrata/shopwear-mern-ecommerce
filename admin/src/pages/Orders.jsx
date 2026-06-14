@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { backendUrl,currency} from "../App";
+import { backendUrl, currency } from "../App";
 import { assets } from "../assets/assets";
 import { toast } from "react-toastify";
 
@@ -8,36 +8,61 @@ const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
 
   const fetchAllOrders = async () => {
-    if (!token) {
-      return null;
-    }
-
     try {
-      const res = await axios.post(backendUrl +"/api/order/list",{}, {headers: { token }});
-      
+      const res = await axios.get(
+        backendUrl + "/api/orders/admin/all",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (res.data.success) {
-        setOrders(res.data.orders.reverse());
-      } else {
-        toast.error(res.data.message)
+        setOrders(res.data.orders);
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      toast.error("Failed to load orders");
     }
   };
 
   const handleStatus = async (e, orderId) => {
     try {
-      const res = await axios.post(backendUrl + "/api/order/status",{ orderId, status: e.target.value },{ headers: { token } });
+      const res = await axios.put(
+        backendUrl + `/api/orders/admin/status/${orderId}`,
+        {
+          orderStatus: e.target.value,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (res.data.success) {
-        await fetchAllOrders();
+        fetchAllOrders();
+        toast.success("Status updated");
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      toast.error("Failed to update status");
     }
   };
+
+  // const handleStatus = async (e, orderId) => {
+  //   try {
+  //     const res = await axios.post(backendUrl + "/api/order/status", { orderId, status: e.target.value }, { headers: { token } });
+
+  //     if (res.data.success) {
+  //       await fetchAllOrders();
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error(error.message);
+  //   }
+  // };
 
   useEffect(() => {
     fetchAllOrders();
@@ -82,19 +107,35 @@ const Orders = ({ token }) => {
                     ", " +
                     order.address.country +
                     ", " +
-                    order.address.zipcode}
+                    order.address.zipCode}
                 </p>
               </div>
-              <p>{order.address.phone}</p>
+              <p>{order.address.mobile}</p>
             </div>
             <div>
               <p className='text-sm sm:text-[15px]'>Items: {order.items.length}</p>
-              <p className='mt-3'>Method: {order.paymentMethod}</p>
-              <p>Payment: {order.payment ? "Done" : "Pending"}</p>
-              <p>Date: {new Date(order.date).toLocaleDateString()}</p>
+              <p className='mt-3'>Method: {order.paymentMethod?.toUpperCase()}</p>
+              <p>Payment: {order.paymentStatus}</p>
+              <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
             </div>
-            <p className='text-sm sm:text-[18px] '>{order.amount}{currency}</p>
-            <select value={order.status}
+            <p className='text-sm sm:text-[18px] '>{currency}{order.totalAmount}</p>
+
+
+            <select
+              value={order.orderStatus}
+              onChange={(e) => handleStatus(e, order._id)}
+              className="p-2 font-semibold border"
+            >
+              <option value="Order Placed">Order Placed</option>
+              <option value="Processing">Processing</option>
+              <option value="Ready for Shipping">Ready for Shipping</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Out for Delivery">Out for Delivery</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+
+            {/* <select value={order.status}
               onChange={(e) => handleStatus(e, order._id)}
               className='p-2 font-semibold'
             >
@@ -103,7 +144,10 @@ const Orders = ({ token }) => {
               <option value='Shipped'>Shipped</option>
               <option value='Out for delivery'>Out for delivery</option>
               <option value='Delivered'>Delivered</option>
-            </select>
+            </select> */}
+
+
+
           </div>
         ))}
       </div>
