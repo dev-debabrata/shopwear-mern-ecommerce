@@ -204,6 +204,242 @@ export const useAppContext = () => {
 // import { axiosInstance } from "../utils/axios";
 // import { toast } from "react-toastify";
 
+// import {
+//   getUserData,
+//   addToWishlist as addWishlistApi,
+//   removeFromWishlist as removeWishlistApi,
+//   addToCart as addCartApi,
+//   removeFromCart as removeCartApi,
+//   updateCartQuantity as updateCartQuantityApi,
+// } from "../services/userService";
+
+// const AppContext = createContext(undefined);
+
+// export const AppProvider = ({ children }) => {
+//   const [isAuthReady, setIsAuthReady] = useState(false);
+//   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+//   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+//   const [isUserDetailOpen, setIsUserDetailOpen] = useState(false);
+//   const [isPasswordHidden, setIsPasswordHidden] = useState(true);
+//   const [loading, setLoading] = useState(false);
+//   const [products, setProducts] = useState([]);
+
+//   const [user, setUser] = useState(() =>
+//     JSON.parse(localStorage.getItem("user") || "null")
+//   );
+
+//   const [cartItems, setCartItems] = useState([]);
+//   const [wishlistItems, setWishlistItems] = useState([]);
+
+//   useEffect(() => {
+//     setIsAuthReady(true);
+//   }, []);
+
+//   const loadUserData = async () => {
+//     if (!user) {
+//       setCartItems([]);
+//       setWishlistItems([]);
+//       return;
+//     }
+
+//     try {
+//       const data = await getUserData();
+
+//       setCartItems(data.cartItems || []);
+//       setWishlistItems(data.wishlistItems || []);
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   };
+
+//   useEffect(() => {
+//     loadUserData();
+//   }, [user]);
+
+//   const fetchProducts = async (showLoader = true) => {
+//     if (showLoader) setLoading(true);
+
+//     try {
+//       const res = await axiosInstance.get("/products");
+//       const productList = res.data.products || res.data.data || res.data;
+
+//       setProducts(Array.isArray(productList) ? productList : []);
+//     } catch (err) {
+//       console.error(err);
+//     } finally {
+//       if (showLoader) setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchProducts(true);
+
+//     const interval = setInterval(() => {
+//       fetchProducts(false);
+//     }, 1000);
+
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   const subTotal = useMemo(() => {
+//     return cartItems.reduce((acc, item) => {
+//       const latestProduct = products.find((product) => product._id === item._id);
+
+//       const price = Number(latestProduct?.price || item.price || 0);
+//       const quantity = Number(item.quantity) || 1;
+
+//       return acc + price * quantity;
+//     }, 0);
+//   }, [cartItems, products]);
+
+//   const togglePassword = () => {
+//     setIsPasswordHidden((prev) => !prev);
+//   };
+
+//   const loginUser = (userData) => {
+//     setUser(userData);
+//     localStorage.setItem("user", JSON.stringify(userData));
+//   };
+
+//   const addToWishlist = async (product) => {
+//     if (!user) {
+//       toast.warning("Please login first");
+//       return false;
+//     }
+
+//     try {
+//       const exists = wishlistItems.some((item) => item._id === product._id);
+
+//       if (exists) {
+//         const data = await removeWishlistApi(product._id);
+//         setWishlistItems(data.wishlistItems || []);
+//         toast.info("Removed from wishlist");
+//       } else {
+//         const data = await addWishlistApi(product._id);
+//         setWishlistItems(data.wishlistItems || []);
+//         toast.success("Added to wishlist");
+//       }
+
+//       return true;
+//     } catch (error) {
+//       console.log(error);
+//       toast.error("Wishlist update failed");
+//       return false;
+//     }
+//   };
+
+//   const isInWishlist = (productId) => {
+//     return wishlistItems.some((item) => item._id === productId);
+//   };
+
+//   const addToCart = async (product, size) => {
+//     if (!user) {
+//       toast.warning("Please login first");
+//       return false;
+//     }
+
+//     if (!size) {
+//       toast.warning("Please select a size");
+//       return false;
+//     }
+
+//     try {
+//       const data = await addCartApi(product._id, size);
+//       setCartItems(data.cartItems || []);
+//       toast.success("Added to cart");
+//       return true;
+//     } catch (error) {
+//       console.log(error);
+//       toast.error("Cart update failed");
+//       return false;
+//     }
+//   };
+
+//   const removeFromCart = async (productId, size) => {
+//     try {
+//       const data = await removeCartApi(productId, size);
+//       setCartItems(data.cartItems || []);
+//       toast.success("Product deleted successfully");
+//     } catch (error) {
+//       console.log(error);
+//       toast.error("Cart delete failed");
+//     }
+//   };
+
+//   const updateCartQuantity = async (productId, size, quantity) => {
+//     try {
+//       const data = await updateCartQuantityApi(productId, size, quantity);
+//       setCartItems(data.cartItems || []);
+//     } catch (error) {
+//       console.log(error);
+//       toast.error("Quantity update failed");
+//     }
+//   };
+
+//   return (
+//     <AppContext.Provider
+//       value={{
+//         isAuthReady,
+
+//         isDropdownOpen,
+//         setIsDropdownOpen,
+//         isSearchBarOpen,
+//         setIsSearchBarOpen,
+
+//         user,
+//         setUser,
+//         loginUser,
+
+//         cartItems,
+//         setCartItems,
+//         addToCart,
+//         removeFromCart,
+//         updateCartQuantity,
+
+//         wishlistItems,
+//         setWishlistItems,
+//         addToWishlist,
+//         isInWishlist,
+
+//         loadUserData,
+
+//         products,
+//         setProducts,
+//         fetchProducts,
+
+//         subTotal,
+
+//         isUserDetailOpen,
+//         setIsUserDetailOpen,
+
+//         isPasswordHidden,
+//         setIsPasswordHidden,
+//         togglePassword,
+
+//         loading,
+//         setLoading,
+//       }}
+//     >
+//       {children}
+//     </AppContext.Provider>
+//   );
+// };
+
+// export const useAppContext = () => {
+//   const context = useContext(AppContext);
+
+//   if (!context) {
+//     throw new Error("useAppContext must be used within an AppProvider");
+//   }
+
+//   return context;
+// };
+
+
+// import { createContext, useContext, useEffect, useMemo, useState } from "react";
+// import { axiosInstance } from "../utils/axios";
+// import { toast } from "react-toastify";
+
 // const AppContext = createContext(undefined);
 
 // export const AppProvider = ({ children }) => {
