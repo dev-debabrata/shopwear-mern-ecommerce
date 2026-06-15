@@ -56,22 +56,6 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// export const createProduct = async (req, res) => {
-//   try {
-//     const product = await Product.create(req.body);
-
-//     res.status(201).json({
-//       message: "Product created successfully",
-//       product,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       message: "Something went wrong",
-//       error: error.message,
-//     });
-//   }
-// };
-
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -143,17 +127,6 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // for (let i = 0; i < fileSlots.length; i++) {
-    //   const file = fileSlots[i];
-    //   if (file) {
-    //     const result = await cloudinary.uploader.upload(file.path, {
-    //       folder: "products",
-    //     });
-    //     fs.unlinkSync(file.path);
-    //     images[i] = result.secure_url; // replace that slot
-    //   }
-    // }
-
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       {
@@ -180,30 +153,6 @@ export const updateProduct = async (req, res) => {
     });
   }
 };
-
-// export const updateProduct = async (req, res) => {
-//   try {
-//     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-//       new: true,
-//     });
-
-//     if (!product) {
-//       return res.status(404).json({
-//         message: "No product found",
-//       });
-//     }
-
-//     res.status(200).json({
-//       message: "Product updated successfully",
-//       product,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       message: "Something went wrong",
-//       error: error.message,
-//     });
-//   }
-// };
 
 export const updateProductField = async (req, res) => {
   try {

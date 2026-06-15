@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
-import { axiosInstance } from "../utils/axios";
 import { useAppContext } from "../context/AppContext";
 
 import Container from "../layout/Container";
@@ -12,15 +10,32 @@ import Loading from "../components/Loading";
 import ProductItem from "../components/ProductItem";
 import { Search, X } from "lucide-react";
 
+const initialCheckedBox = {
+  Men: false,
+  Women: false,
+  Kids: false,
+  Topwear: false,
+  Bottomwear: false,
+  Winterwear: false,
+};
+
+const checkboxItems = [
+  "Men",
+  "Women",
+  "Kids",
+  "Topwear",
+  "Bottomwear",
+  "Winterwear",
+];
+
 const CollectionsPage = () => {
-  // const [products, setProducts] = useState([]);
-  // const [pageLoading, setPageLoading] = useState(false);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [sortValue, setSortValue] = useState("name-asc");
   const [searchInput, setSearchInput] = useState("");
   const [showFilter, setShowFilter] = useState(false);
-
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [checkedBox, setCheckedBox] = useState(initialCheckedBox);
 
   const {
     products,
@@ -31,75 +46,28 @@ const CollectionsPage = () => {
     isInWishlist,
   } = useAppContext();
 
-  // const { isSearchBarOpen, setIsSearchBarOpen, addToWishlist, isInWishlist } =
-  //   useAppContext();
-
-  const [checkedBox, setCheckedBox] = useState({
-    Men: false,
-    Women: false,
-    Kids: false,
-    Topwear: false,
-    Bottomwear: false,
-    Winterwear: false,
-  });
-
-  // useEffect(() => {
-  //   const fetchProducts = async () => {
-  //     try {
-  //       setPageLoading(true);
-
-  //       const res = await axiosInstance.get("/products");
-
-  //       const productList = Array.isArray(res.data)
-  //         ? res.data
-  //         : Array.isArray(res.data.products)
-  //           ? res.data.products
-  //           : [];
-
-  //       setProducts(productList);
-  //     } catch (err) {
-  //       console.error(err);
-  //     } finally {
-  //       setPageLoading(false);
-  //     }
-  //   };
-
-  //   fetchProducts();
-  // }, []);
-
-
   useEffect(() => {
     const search = searchParams.get("search") || "";
     setSearchInput(search);
   }, [searchParams]);
 
+  const closeSearch = () => {
+    setSearchInput("");
+    setSearchParams({});
+    setIsSearchBarOpen(false);
+  };
 
   const handleSearch = () => {
-    if (!searchInput.trim()) {
+    const search = searchInput.trim();
+
+    if (!search) {
       setSearchParams({});
       return;
     }
 
-    setSearchParams({ search: searchInput.trim() });
+    setSearchParams({ search });
     setIsSearchBarOpen(false);
   };
-
-  // useEffect(() => {
-  //   const fetchProducts = async () => {
-  //     try {
-  //       setPageLoading(true);
-
-  //       const res = await axiosInstance.get("/products");
-  //       setProducts(res.data || []);
-  //     } catch (err) {
-  //       console.error(err);
-  //     } finally {
-  //       setPageLoading(false);
-  //     }
-  //   };
-
-  //   fetchProducts();
-  // }, []);
 
   const toggleCheckbox = (e) => {
     const { name, checked } = e.target;
@@ -110,10 +78,11 @@ const CollectionsPage = () => {
     }));
   };
 
-  const handleWishlist = (e, product) => {
+  const handleWishlist = async (e, product) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    const success = addToWishlist(product);
+    const success = await addToWishlist(product);
 
     if (!success) {
       setTimeout(() => {
@@ -146,23 +115,26 @@ const CollectionsPage = () => {
     }
 
     result.sort((a, b) => {
-      if (sortValue === "price-asc") return a.price - b.price;
-      if (sortValue === "price-desc") return b.price - a.price;
+      const priceA = Number(a.price || 0);
+      const priceB = Number(b.price || 0);
+
+      if (sortValue === "price-asc") return priceA - priceB;
+      if (sortValue === "price-desc") return priceB - priceA;
 
       if (sortValue === "name-asc") {
-        return a.name?.localeCompare(b.name) || 0;
+        return (a.name || "").localeCompare(b.name || "");
       }
 
       if (sortValue === "name-desc") {
-        return b.name?.localeCompare(a.name) || 0;
+        return (b.name || "").localeCompare(a.name || "");
       }
 
       if (sortValue === "createdAt-asc") {
-        return new Date(a.createdAt) - new Date(b.createdAt);
+        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
       }
 
       if (sortValue === "createdAt-desc") {
-        return new Date(b.createdAt) - new Date(a.createdAt);
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       }
 
       return 0;
@@ -172,18 +144,122 @@ const CollectionsPage = () => {
   }, [products, searchInput, checkedBox, sortValue]);
 
   const clearFilters = () => {
-    setCheckedBox({
-      Men: false,
-      Women: false,
-      Kids: false,
-      Topwear: false,
-      Bottomwear: false,
-      Winterwear: false,
-    });
-
+    setCheckedBox(initialCheckedBox);
     setSearchInput("");
     setSearchParams({});
   };
+  // // const [products, setProducts] = useState([]);
+  // // const [pageLoading, setPageLoading] = useState(false);
+  // const [sortValue, setSortValue] = useState("name-asc");
+  // const [searchInput, setSearchInput] = useState("");
+  // const [showFilter, setShowFilter] = useState(false);
+
+  // const navigate = useNavigate();
+  // const [searchParams, setSearchParams] = useSearchParams();
+
+  // const {
+  //   products,
+  //   loading,
+  //   isSearchBarOpen,
+  //   setIsSearchBarOpen,
+  //   addToWishlist,
+  //   isInWishlist,
+  // } = useAppContext();
+
+  // // const [checkedBox, setCheckedBox] = useState({
+  // //   Men: false,
+  // //   Women: false,
+  // //   Kids: false,
+  // //   Topwear: false,
+  // //   Bottomwear: false,
+  // //   Winterwear: false,
+  // // });
+
+  // useEffect(() => {
+  //   const search = searchParams.get("search") || "";
+  //   setSearchInput(search);
+  // }, [searchParams]);
+
+  // const handleSearch = () => {
+  //   if (!searchInput.trim()) {
+  //     setSearchParams({});
+  //     return;
+  //   }
+
+  //   setSearchParams({ search: searchInput.trim() });
+  //   setIsSearchBarOpen(false);
+  // };
+
+  // const toggleCheckbox = (e) => {
+  //   const { name, checked } = e.target;
+
+  //   setCheckedBox((prev) => ({
+  //     ...prev,
+  //     [name]: checked,
+  //   }));
+  // };
+
+  // const handleWishlist = async (e, product) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+
+  //   const success = await addToWishlist(product);
+
+  //   if (!success) {
+  //     setTimeout(() => {
+  //       navigate("/signup?mode=login");
+  //     }, 500);
+  //   }
+  // };
+
+  // const filteredProducts = useMemo(() => {
+  //   let result = [...products];
+
+  //   const search = searchInput.toLowerCase().trim();
+
+  //   if (search) {
+  //     result = result.filter((product) => {
+  //       return (
+  //         product.name?.toLowerCase().includes(search) ||
+  //         product.category?.toLowerCase().includes(search) ||
+  //         product.subCategory?.toLowerCase().includes(search)
+  //       );
+  //     });
+  //   }
+
+  //   const isAnyCategoryChecked = Object.values(checkedBox).some(Boolean);
+
+  //   if (isAnyCategoryChecked) {
+  //     result = result.filter((product) => {
+  //       return checkedBox[product.category] || checkedBox[product.subCategory];
+  //     });
+  //   }
+
+  //   result.sort((a, b) => {
+  //     if (sortValue === "price-asc") return a.price - b.price;
+  //     if (sortValue === "price-desc") return b.price - a.price;
+
+  //     if (sortValue === "name-asc") {
+  //       return a.name?.localeCompare(b.name) || 0;
+  //     }
+
+  //     if (sortValue === "name-desc") {
+  //       return b.name?.localeCompare(a.name) || 0;
+  //     }
+
+  //     if (sortValue === "createdAt-asc") {
+  //       return new Date(a.createdAt) - new Date(b.createdAt);
+  //     }
+
+  //     if (sortValue === "createdAt-desc") {
+  //       return new Date(b.createdAt) - new Date(a.createdAt);
+  //     }
+
+  //     return 0;
+  //   });
+
+  //   return result;
+  // }, [products, searchInput, checkedBox, sortValue]);
 
   // const clearFilters = () => {
   //   setCheckedBox({
@@ -196,16 +272,17 @@ const CollectionsPage = () => {
   //   });
 
   //   setSearchInput("");
+  //   setSearchParams({});
   // };
 
-  const checkboxItems = [
-    "Men",
-    "Women",
-    "Kids",
-    "Topwear",
-    "Bottomwear",
-    "Winterwear",
-  ];
+  // const checkboxItems = [
+  //   "Men",
+  //   "Women",
+  //   "Kids",
+  //   "Topwear",
+  //   "Bottomwear",
+  //   "Winterwear",
+  // ];
 
   return (
     <Container>
@@ -225,34 +302,21 @@ const CollectionsPage = () => {
             />
 
             <button
+              type="button"
               className="w-4 text-gray-500"
-              onClick={handleSearch}>
+              onClick={handleSearch}
+            >
               <Search size={20} />
             </button>
-
-            {/* <img src="/images/search.png" className="w-4" alt="search icon" onClick={handleSearch} /> */}
-          </div >
+          </div>
 
           <button
-            className="w-3 cursor-pointer  text-gray-500"
-            onClick={() => {
-              setSearchInput("");
-              setSearchParams({});
-              setIsSearchBarOpen(false);
-            }}>
+            type="button"
+            className="cursor-pointer text-gray-500"
+            onClick={closeSearch}
+          >
             <X size={20} />
           </button>
-
-          {/* <img
-            src="/images/search-close.png"
-            className="w-3 cursor-pointer"
-            alt="search-close"
-            onClick={() => {
-              setSearchInput("");
-              setSearchParams({});
-              setIsSearchBarOpen(false);
-            }}
-          /> */}
         </div>
       )}
 
@@ -265,25 +329,17 @@ const CollectionsPage = () => {
             FILTERS
             <img
               src="/images/back-arrow.png"
-              className={`h-3 sm:hidden transition-transform ${showFilter ? "rotate-90" : ""
-                }`}
+              className={`h-3 sm:hidden transition-transform ${
+                showFilter ? "rotate-90" : ""
+              }`}
               alt="back-arrow"
             />
           </p>
 
-          {/* <p className="flex gap-2 items-center text-xl my-2 cursor-pointer">
-            FILTERS
-            <img
-              src="/images/back-arrow.png"
-              className="h-3 sm:hidden"
-              alt="back-arrow"
-            />
-          </p> */}
-
-          {/* <div className="hidden sm:block border pl-5 py-3 mt-6 border-gray-300"> */}
           <div
-            className={`border pl-5 py-3 mt-6 border-gray-300 ${showFilter ? "block" : "hidden"
-              } sm:block`}
+            className={`border pl-5 py-3 mt-6 border-gray-300 ${
+              showFilter ? "block" : "hidden"
+            } sm:block`}
           >
             <p className="font-medium mb-3 text-sm">CATEGORIES</p>
 
@@ -304,8 +360,9 @@ const CollectionsPage = () => {
 
           {/* <div className="hidden sm:block gap-2 border pl-5 py-3 my-5 mt-6 border-gray-300 text-sm"> */}
           <div
-            className={`gap-2 border pl-5 py-3 my-5 mt-6 border-gray-300 text-sm ${showFilter ? "block" : "hidden"
-              } sm:block`}
+            className={`gap-2 border pl-5 py-3 my-5 mt-6 border-gray-300 text-sm ${
+              showFilter ? "block" : "hidden"
+            } sm:block`}
           >
             <p className="font-medium mb-3 text-sm">TYPES</p>
 
@@ -354,9 +411,6 @@ const CollectionsPage = () => {
             </select>
           </div>
 
-          {/* {pageLoading ? (
-            <Loading text="Loading collections..." />
-          ) : filteredProducts.length === 0 ? ( */}
           {loading ? (
             <Loading text="Loading collections..." />
           ) : filteredProducts.length === 0 ? (
@@ -371,11 +425,7 @@ const CollectionsPage = () => {
                   {...product}
                   showWishlist={true}
                   isWishlisted={isInWishlist(product._id)}
-                  onWishlist={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleWishlist(e, product);
-                  }}
+                  onWishlist={(e) => handleWishlist(e, product)}
                 />
               ))}
             </div>

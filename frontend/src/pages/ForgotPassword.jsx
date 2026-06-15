@@ -1,39 +1,72 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { axiosInstance } from "../utils/axios";
 
 import Container from "../layout/Container";
 import Button from "../components/Button";
 import Input from "../components/Input";
 
+import { forgotPassword } from "../services/authService";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  const submitForm = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const res = await axiosInstance.post("/users/forgot-password", {
-        email,
-      });
-
-      setMessage(res.data.message);
+  const forgotPasswordMutation = useMutation({
+    mutationFn: forgotPassword,
+    onSuccess: (data) => {
+      setMessage(data.message);
       toast.success("Reset link has been sent to your email");
 
-      setTimeout(() => navigate("/signup?mode=login"), 2000);
-    } catch (error) {
+      setTimeout(() => {
+        navigate("/signup?mode=login");
+      }, 2000);
+    },
+    onError: (error) => {
       setMessage(error?.response?.data?.message || "Something went wrong");
-      toast.error("Something went wrong");
-    } finally {
-      setIsLoading(false);
+      toast.error(error?.response?.data?.message || "Something went wrong");
+    },
+  });
+
+  const submitForm = (e) => {
+    e.preventDefault();
+
+    if (!email) {
+      toast.warning("Please enter your email");
+      return;
     }
+
+    forgotPasswordMutation.mutate(email);
   };
+
+  // const [email, setEmail] = useState("");
+  // const [message, setMessage] = useState("");
+  // const [isLoading, setIsLoading] = useState(false);
+  // const navigate = useNavigate();
+
+  // const submitForm = async (e) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+
+  //   try {
+  //     const res = await axiosInstance.post("/users/forgot-password", {
+  //       email,
+  //     });
+
+  //     setMessage(res.data.message);
+  //     toast.success("Reset link has been sent to your email");
+
+  //     setTimeout(() => navigate("/signup?mode=login"), 2000);
+  //   } catch (error) {
+  //     setMessage(error?.response?.data?.message || "Something went wrong");
+  //     toast.error("Something went wrong");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   return (
     <Container>
@@ -59,17 +92,16 @@ const ForgotPassword = () => {
 
           <div className="flex justify-center">
             <Button
-              loading={isLoading}
-              disabled={isLoading}
+              loading={forgotPasswordMutation.isPending}
+              disabled={forgotPasswordMutation.isPending}
               type="primary"
               className=" font-light"
               buttonType="submit"
               size="small"
             >
-              {isLoading ? "Sending..." : "SEND"}
+              {forgotPasswordMutation.isPending ? "Sending..." : "SEND"}
             </Button>
           </div>
-
 
           {/* <Button loading={isLoading} buttonType="submit" size="large">
             {isLoading ? "Sending..." : "SEND"}

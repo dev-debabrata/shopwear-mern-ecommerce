@@ -6,11 +6,12 @@ import { useAppContext } from "../context/AppContext";
 
 import Container from "../layout/Container";
 import SearchItem from "./SearchItem";
-
+import { useQueryClient } from "@tanstack/react-query";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
@@ -18,13 +19,13 @@ const Navbar = () => {
   const {
     setIsSearchBarOpen,
     cartItems,
-    setCartItems,
     wishlistItems,
-    setWishlistItems,
     isUserDetailOpen,
     setIsUserDetailOpen,
     user,
     setUser,
+    setCartItems,
+    setWishlistItems,
   } = useAppContext();
 
   const logoutUser = () => {
@@ -36,26 +37,13 @@ const Navbar = () => {
     setWishlistItems([]);
     setIsUserDetailOpen(false);
 
+    queryClient.removeQueries({ queryKey: ["userData"] });
+    queryClient.removeQueries({ queryKey: ["addresses"] });
+    queryClient.removeQueries({ queryKey: ["orders"] });
+
     toast.success("Logged out successfully!");
-
-    setTimeout(() => {
-      navigate("/");
-    }, 1000);
+    navigate("/");
   };
-
-  // const logoutUser = () => {
-  //   localStorage.removeItem("token");
-  //   localStorage.removeItem("user");
-
-  //   setUser(null);
-  //   setIsUserDetailOpen(false);
-
-  //   toast.success("Logged out successfully!");
-
-  //   setTimeout(() => {
-  //     navigate("/");
-  //   }, 1000);
-  // };
 
   const goToProtectedPage = (path) => {
     if (!user) {
@@ -67,21 +55,11 @@ const Navbar = () => {
     navigate(path);
   };
 
-  // const logoutUser = () => {
-  //   localStorage.removeItem("token");
-  //   localStorage.removeItem("user");
-
-  //   setUser(null);
-  //   setIsUserDetailOpen(false);
-  //   navigate("/");
-  // };
-
   const toggleUserMenu = (e) => {
-    e.stopPropagation(); // prevent this click from being seen as an "outside click"
+    e.stopPropagation();
     setIsUserDetailOpen((prev) => !prev);
   };
 
-  // Close dropdown when clicking anywhere outside it
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
@@ -96,6 +74,87 @@ const Navbar = () => {
     };
   }, [setIsUserDetailOpen]);
 
+  // const {
+  //   setIsSearchBarOpen,
+  //   cartItems,
+  //   setCartItems,
+  //   wishlistItems,
+  //   setWishlistItems,
+  //   isUserDetailOpen,
+  //   setIsUserDetailOpen,
+  //   user,
+  //   setUser,
+  // } = useAppContext();
+
+  // const logoutUser = () => {
+  //   localStorage.removeItem("token");
+  //   localStorage.removeItem("user");
+
+  //   setUser(null);
+  //   setCartItems([]);
+  //   setWishlistItems([]);
+  //   setIsUserDetailOpen(false);
+
+  //   toast.success("Logged out successfully!");
+
+  //   setTimeout(() => {
+  //     navigate("/");
+  //   }, 1000);
+  // };
+
+  // // const logoutUser = () => {
+  // //   localStorage.removeItem("token");
+  // //   localStorage.removeItem("user");
+
+  // //   setUser(null);
+  // //   setIsUserDetailOpen(false);
+
+  // //   toast.success("Logged out successfully!");
+
+  // //   setTimeout(() => {
+  // //     navigate("/");
+  // //   }, 1000);
+  // // };
+
+  // const goToProtectedPage = (path) => {
+  //   if (!user) {
+  //     toast.error("Please login first");
+  //     navigate("/signup?mode=login");
+  //     return;
+  //   }
+
+  //   navigate(path);
+  // };
+
+  // // const logoutUser = () => {
+  // //   localStorage.removeItem("token");
+  // //   localStorage.removeItem("user");
+
+  // //   setUser(null);
+  // //   setIsUserDetailOpen(false);
+  // //   navigate("/");
+  // // };
+
+  // const toggleUserMenu = (e) => {
+  //   e.stopPropagation(); // prevent this click from being seen as an "outside click"
+  //   setIsUserDetailOpen((prev) => !prev);
+  // };
+
+  // // Close dropdown when clicking anywhere outside it
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+  //       setIsUserDetailOpen(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("click", handleClickOutside);
+
+  //   return () => {
+  //     document.removeEventListener("click", handleClickOutside);
+  //   };
+  // }, [setIsUserDetailOpen]);
+
   return (
     <Container>
       <div className="flex items-center py-5 justify-between text-sm font-medium uppercase">
@@ -106,9 +165,7 @@ const Navbar = () => {
             className=" w-6 h-6 md:w-8 md:h-8 object-contain brightness-0"
           />
 
-          <h1 className="md:text-[30px] text-lg  font-semibold">
-            ShopWear
-          </h1>
+          <h1 className="md:text-[30px] text-lg  font-semibold">ShopWear</h1>
         </Link>
 
         <ul className="hidden gap-5 text-gray-700 sm:flex">
@@ -117,8 +174,9 @@ const Navbar = () => {
               <>
                 Home
                 <hr
-                  className={`w-2/4 h-[1.5px] mx-auto bg-gray-700 ${isActive ? "block" : "hidden"
-                    }`}
+                  className={`w-2/4 h-[1.5px] mx-auto bg-gray-700 ${
+                    isActive ? "block" : "hidden"
+                  }`}
                 />
               </>
             )}
@@ -129,8 +187,9 @@ const Navbar = () => {
               <>
                 Collection
                 <hr
-                  className={`w-2/4 h-[1.5px] mx-auto bg-gray-700 ${isActive ? "block" : "hidden"
-                    }`}
+                  className={`w-2/4 h-[1.5px] mx-auto bg-gray-700 ${
+                    isActive ? "block" : "hidden"
+                  }`}
                 />
               </>
             )}
@@ -141,8 +200,9 @@ const Navbar = () => {
               <>
                 About
                 <hr
-                  className={`w-2/4 bg-gray-700 mx-auto h-[0.094rem] ${isActive ? "block" : "hidden"
-                    }`}
+                  className={`w-2/4 bg-gray-700 mx-auto h-[0.094rem] ${
+                    isActive ? "block" : "hidden"
+                  }`}
                 />
               </>
             )}
@@ -153,8 +213,9 @@ const Navbar = () => {
               <>
                 Contact
                 <hr
-                  className={`w-2/4 bg-gray-700 mx-auto h-[0.094rem] ${isActive ? "block" : "hidden"
-                    }`}
+                  className={`w-2/4 bg-gray-700 mx-auto h-[0.094rem] ${
+                    isActive ? "block" : "hidden"
+                  }`}
                 />
               </>
             )}
@@ -162,9 +223,12 @@ const Navbar = () => {
         </ul>
 
         <div className="flex gap-4 md:gap-6 items-center">
-          <button type="button" onClick={() => setIsSearchBarOpen(true)} className=" cursor-pointer">
+          <button
+            type="button"
+            onClick={() => setIsSearchBarOpen(true)}
+            className=" cursor-pointer"
+          >
             <Search />
-
           </button>
 
           <button
@@ -195,26 +259,15 @@ const Navbar = () => {
             )}
           </button>
 
-          {/* <Link to="/wishlist">
-            <Heart />
-          </Link>
-
-          <Link to="/cart" className="relative">
-            <ShoppingCart /> */}
-          {/* <img src={cart} className="w-5 cursor-pointer" alt="cart-icon" /> */}
-          {/* <p className="rounded-full w-4 h-4 bg-black text-white leading-4 text-[0.5rem] text-center absolute bottom-[-0.313rem] right-[-0.313rem]">
-              {cartItems.length}
-            </p>
-          </Link> */}
-
           {user ? (
             <div className="relative" ref={userMenuRef}>
-              <div
+              <button
+                type="button"
                 onClick={toggleUserMenu}
-                className="bg-gray-200 rounded-full w-8 h-8 flex justify-center items-center cursor-pointer uppercase"
+                className="grid h-8 w-8 place-items-center rounded-full bg-gray-200 text-sm font-semibold uppercase cursor-pointer"
               >
-                {user.email?.slice(0, 1)}
-              </div>
+                {user.email?.charAt(0)}
+              </button>
 
               {isUserDetailOpen && (
                 <div className="absolute rounded top-10 right-0 bg-gray-200 p-4 w-[17rem] z-50 flex flex-col gap-2">
@@ -257,17 +310,60 @@ const Navbar = () => {
           )}
 
           {/* Modile response */}
-          <img
-            src="/images/menu.png"
-            className="w-5 cursor-pointer sm:hidden"
-            alt="menu-icon"
+          <button
+            type="button"
+            className="cursor-pointer sm:hidden"
             onClick={() => setIsMenuOpen(true)}
-          />
+          >
+            <img src="/images/menu.png" className="w-5" alt="menu-icon" />
+          </button>
         </div>
 
         <div
-          className={`absolute sm:hidden top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${isMenuOpen ? "w-full" : "w-0"
-            }`}
+          className={`fixed bottom-0 right-0 top-0 z-50 overflow-hidden bg-white transition-all sm:hidden ${
+            isMenuOpen ? "w-full" : "w-0"
+          }`}
+        >
+          <div className="flex flex-col text-gray-600">
+            <button
+              type="button"
+              className="flex cursor-pointer items-center gap-4 p-3"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <img
+                src="/images/back-arrow.png"
+                className="h-4 rotate-180"
+                alt="back-arrow"
+              />
+              <p>Back</p>
+            </button>
+
+            {[
+              { path: "/", label: "Home" },
+              { path: "/collection", label: "Collection" },
+              { path: "/about", label: "About" },
+              { path: "/contact", label: "Contact" },
+            ].map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `border border-gray-200 py-2 pl-6 uppercase ${
+                    isActive ? "bg-black text-white" : ""
+                  }`
+                }
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        </div>
+
+        {/* <div
+          className={`fixed bottom-0 right-0 top-0 z-50 overflow-hidden bg-white transition-all sm:hidden ${
+            isMenuOpen ? "w-full" : "w-0"
+          }`}
         >
           <div className="flex flex-col text-gray-600">
             <div
@@ -285,7 +381,8 @@ const Navbar = () => {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `py-2 pl-6 border border-gray-200 uppercase ${isActive ? "bg-black text-white" : ""
+                `py-2 pl-6 border border-gray-200 uppercase ${
+                  isActive ? "bg-black text-white" : ""
                 }`
               }
               onClick={() => setIsMenuOpen(false)}
@@ -296,7 +393,8 @@ const Navbar = () => {
             <NavLink
               to="/collection"
               className={({ isActive }) =>
-                `py-2 pl-6 border border-gray-200 uppercase ${isActive ? "bg-black text-white" : ""
+                `py-2 pl-6 border border-gray-200 uppercase ${
+                  isActive ? "bg-black text-white" : ""
                 }`
               }
               onClick={() => setIsMenuOpen(false)}
@@ -307,7 +405,8 @@ const Navbar = () => {
             <NavLink
               to="/about"
               className={({ isActive }) =>
-                `py-2 pl-6 border border-gray-200 uppercase ${isActive ? "bg-black text-white" : ""
+                `py-2 pl-6 border border-gray-200 uppercase ${
+                  isActive ? "bg-black text-white" : ""
                 }`
               }
               onClick={() => setIsMenuOpen(false)}
@@ -318,7 +417,8 @@ const Navbar = () => {
             <NavLink
               to="/contact"
               className={({ isActive }) =>
-                `py-2 pl-6 border border-gray-200 uppercase ${isActive ? "bg-black text-white" : ""
+                `py-2 pl-6 border border-gray-200 uppercase ${
+                  isActive ? "bg-black text-white" : ""
                 }`
               }
               onClick={() => setIsMenuOpen(false)}
@@ -326,7 +426,7 @@ const Navbar = () => {
               Contact
             </NavLink>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {location.pathname !== "/collection" && <SearchItem />}

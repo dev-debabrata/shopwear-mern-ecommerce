@@ -1,20 +1,37 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-
-import { axiosInstance } from "../utils/axios";
 import { useAppContext } from "../context/AppContext";
+import { useMutation } from "@tanstack/react-query";
+import { resetPassword } from "../services/authService";
 
 const ResetPassword = () => {
   const { token } = useParams();
+  const navigate = useNavigate();
+
+  const { isPasswordHidden, togglePassword } = useAppContext();
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate();
-  const { isPasswordHidden, togglePassword } = useAppContext();
 
-  const handleSubmit = async (e) => {
+  const resetPasswordMutation = useMutation({
+    mutationFn: resetPassword,
+    onSuccess: (data) => {
+      setMessage(data.message);
+
+      setTimeout(() => {
+        navigate("/signup?mode=login");
+      }, 2000);
+    },
+    onError: (error) => {
+      setMessage(error?.response?.data?.message || "Something went wrong");
+    },
+  });
+
+  const handleSubmit = (e) => {
     e.preventDefault();
+
     if (!token) {
       setMessage("Invalid reset link. No token provided.");
       return;
@@ -25,17 +42,42 @@ const ResetPassword = () => {
       return;
     }
 
-    try {
-      const res = await axiosInstance.post(`/users/reset-password`, {
-        resetToken: token,
-        newPassword: password,
-      });
-      setMessage(res.data.message);
-      setTimeout(() => navigate("/signup?mode=login"), 2000);
-    } catch (error) {
-      setMessage(error.response?.data?.message || "Something went wrong");
-    }
+    resetPasswordMutation.mutate({
+      resetToken: token,
+      newPassword: password,
+    });
   };
+
+  // const { token } = useParams();
+  // const [password, setPassword] = useState("");
+  // const [confirmPassword, setConfirmPassword] = useState("");
+  // const [message, setMessage] = useState("");
+  // const navigate = useNavigate();
+  // const { isPasswordHidden, togglePassword } = useAppContext();
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!token) {
+  //     setMessage("Invalid reset link. No token provided.");
+  //     return;
+  //   }
+
+  //   if (password !== confirmPassword) {
+  //     setMessage("Passwords do not match");
+  //     return;
+  //   }
+
+  //   try {
+  //     const res = await axiosInstance.post(`/users/reset-password`, {
+  //       resetToken: token,
+  //       newPassword: password,
+  //     });
+  //     setMessage(res.data.message);
+  //     setTimeout(() => navigate("/signup?mode=login"), 2000);
+  //   } catch (error) {
+  //     setMessage(error.response?.data?.message || "Something went wrong");
+  //   }
+  // };
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 bg-gray-100 rounded">

@@ -1,6 +1,14 @@
 @import "tailwindcss";
+
+html {
+  scroll-behavior: auto;
+}
+
 body {
-  /* font-family: "Outfit", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+  overflow-x: hidden;
+}
+
+body {
   font-family: Outfit;
 }
 .prata-regular {

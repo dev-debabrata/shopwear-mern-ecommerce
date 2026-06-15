@@ -1,24 +1,21 @@
 import { useState } from "react";
 import { useAppContext } from "../context/AppContext";
-import { cn } from "../utils/cn";
 import { shippingFee } from "../components/constants";
 
 import Container from "../layout/Container";
 import Title from "../components/Title";
-import Input from "../components/Input";
+
 import PaymentMethods from "../components/PaymentMethods";
 import { toast } from "react-toastify";
-import { deliveryFields } from "../data/checkoutData";
+
 import { useNavigate } from "react-router-dom";
 import { createRazorpayOrder } from "../services/paymentService";
 import { createOrder } from "../services/orderService";
 import Address from "../components/Address";
 
-
-
 const Checkout = () => {
-  const { subTotal, cartItems, setCartItems } = useAppContext();
-  // const { subTotal } = useAppContext();
+  const { subTotal, cartItems, clearCart } = useAppContext();
+
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const navigate = useNavigate();
 
@@ -35,16 +32,41 @@ const Checkout = () => {
     mobile: "",
   });
 
+  const saveOrder = async (paymentStatus = "pending", paymentInfo = null) => {
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty");
+      return false;
+    }
 
-  // const handlePlaceOrder = (e) => {
-  //   e.preventDefault();
+    const orderData = {
+      items: cartItems.map((item) => ({
+        productId: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.size,
+        image: Array.isArray(item.image) ? item.image[0] : item.image,
+      })),
 
-  //   toast.success("Order placed successfully");
-  //   navigate("/orders");
-  // };
+      address: formData,
+      paymentMethod,
+      paymentStatus,
 
+      razorpayPaymentId: paymentInfo?.razorpay_payment_id || "",
+      razorpayOrderId: paymentInfo?.razorpay_order_id || "",
+      razorpaySignature: paymentInfo?.razorpay_signature || "",
 
+      subTotal,
+      shippingFee,
+      totalAmount: subTotal + shippingFee,
+    };
 
+    await createOrder(orderData);
+
+    await clearCart();
+
+    return true;
+  };
 
   const handleRazorpayPayment = async () => {
     try {
@@ -53,11 +75,8 @@ const Checkout = () => {
         return;
       }
 
-
       const totalAmount = subTotal + shippingFee;
-
       const data = await createRazorpayOrder(totalAmount);
-
 
       const options = {
         key: data.key,
@@ -75,9 +94,12 @@ const Checkout = () => {
         },
 
         handler: async function (response) {
-          await saveOrder("paid", response);
-          toast.success("Payment Successful");
-          navigate("/order-success");
+          const success = await saveOrder("paid", response);
+
+          if (success) {
+            toast.success("Payment Successful");
+            navigate("/order-success");
+          }
         },
 
         prefill: {
@@ -91,36 +113,6 @@ const Checkout = () => {
         },
       };
 
-      // const options = {
-      //   key: data.key,
-      //   amount: data.order.amount,
-      //   currency: data.order.currency,
-      //   name: "ShopWear Store",
-      //   description: "Order Payment",
-      //   order_id: data.order.id,
-
-
-      //   handler: async function () {
-      //     await saveOrder("paid");
-      //     toast.success("Payment Successful");
-      //     navigate("/order-success");
-      //   },
-      //   // handler: function () {
-      //   //   toast.success("Payment Successful");
-      //   //   navigate("/orders");
-      //   // },
-
-      //   prefill: {
-      //     name: `${formData.firstName} ${formData.lastName}`,
-      //     email: formData.emailAddress,
-      //     contact: `91${formData.mobile}`,
-      //   },
-
-      //   theme: {
-      //     color: "#000000",
-      //   },
-      // };
-
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
@@ -132,15 +124,29 @@ const Checkout = () => {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
-    if (!formData.mobile || !formData.street) {
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    if (!formData._id || !formData.mobile || !formData.street) {
       toast.error("Please select or add delivery address");
       return;
     }
 
+    // if (!formData.mobile || !formData.street) {
+    //   toast.error("Please select or add delivery address");
+    //   return;
+    // }
+
     if (paymentMethod === "cod") {
-      await saveOrder("pending");
-      toast.success("Order placed successfully");
-      navigate("/order-success");
+      const success = await saveOrder("pending");
+
+      if (success) {
+        toast.success("Order placed successfully");
+        navigate("/order-success");
+      }
+
       return;
     }
 
@@ -154,103 +160,10 @@ const Checkout = () => {
     }
   };
 
-
-  const saveOrder = async (
-    paymentStatus = "pending",
-    paymentInfo = null
-  ) => {
-    const orderData = {
-      items: cartItems.map((item) => ({
-        productId: item._id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        size: item.size,
-        image: Array.isArray(item.image)
-          ? item.image[0]
-          : item.image,
-      })),
-
-      address: formData,
-
-      paymentMethod,
-      paymentStatus,
-
-      razorpayPaymentId:
-        paymentInfo?.razorpay_payment_id || "",
-
-      razorpayOrderId:
-        paymentInfo?.razorpay_order_id || "",
-
-      razorpaySignature:
-        paymentInfo?.razorpay_signature || "",
-
-      subTotal,
-      shippingFee,
-      totalAmount: subTotal + shippingFee,
-    };
-
-    await createOrder(orderData);
-
-    setCartItems([]);
-    localStorage.removeItem("cartItems");
-  };
-
-
-  // const saveOrder = async (paymentStatus = "pending") => {
-  //   const orderData = {
-  //     items: cartItems.map((item) => ({
-  //       productId: item._id,
-  //       name: item.name,
-  //       price: item.price,
-  //       quantity: item.quantity,
-  //       size: item.size,
-  //       image: Array.isArray(item.image) ? item.image[0] : item.image,
-  //     })),
-  //     address: formData,
-  //     paymentMethod,
-  //     paymentStatus,
-  //     subTotal,
-  //     shippingFee,
-  //     totalAmount: subTotal + shippingFee,
-  //   };
-
-  //   await createOrder(orderData);
-
-  //   setCartItems([]);
-  //   localStorage.removeItem("cartItems");
-  // };
-
-
-  // const saveOrder = async (paymentStatus = "pending") => {
-  //   const orderData = {
-  //     items: cartItems.map((item) => ({
-  //       productId: item._id,
-  //       name: item.name,
-  //       price: item.price,
-  //       quantity: item.quantity,
-  //       size: item.size,
-  //       image: item.images?.[0],
-  //     })),
-  //     address: formData,
-  //     paymentMethod,
-  //     paymentStatus,
-  //     subTotal,
-  //     shippingFee,
-  //     totalAmount: subTotal + shippingFee,
-  //   };
-
-  //   await createOrder(orderData);
-
-  //   setCartItems([]);
-  //   localStorage.removeItem("cartItems");
-  // };
-
-
-
   return (
     <Container>
-      <form onSubmit={handlePlaceOrder}
+      <form
+        onSubmit={handlePlaceOrder}
         className="border-t border-gray-200 
       flex flex-col justify-between sm:flex-row min-h-[80vh] pt-5 sm:pt-14 gap-4"
       >
@@ -264,8 +177,6 @@ const Checkout = () => {
             formData={formData}
             setFormData={setFormData}
           />
-
-
         </div>
         <div className="mt-8">
           <div className="min-w-70 mt-8">

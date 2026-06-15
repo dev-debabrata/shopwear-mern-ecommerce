@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { axiosInstance } from "../utils/axios";
 import { useAppContext } from "../context/AppContext";
 
 import Container from "../layout/Container";
@@ -13,63 +12,56 @@ import Button from "../components/Button";
 import { Heart, X } from "lucide-react";
 import Loading from "../components/Loading";
 import RelatedProducts from "../components/RelatedProducts";
+import { getProductById } from "../services/productService";
 
 const ProductPage = () => {
   const { _id } = useParams();
+  const navigate = useNavigate();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
+  const { user, cartItems, addToWishlist, isInWishlist, addToCart } =
+    useAppContext();
+  // const { user, addToWishlist, isInWishlist, addToCart } = useAppContext();
+
   const {
-    cartItems,
-    setCartItems,
-    user,
-    addToWishlist,
-    isInWishlist,
-  } = useAppContext();
+    data: product,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["product", _id],
+    queryFn: () => getProductById(_id),
+    enabled: !!_id,
+  });
 
-  const navigate = useNavigate();
+  const productImages = Array.isArray(product?.image)
+    ? product.image
+    : Array.isArray(product?.images)
+      ? product.images
+      : [];
 
-  // const { cartItems, setCartItems, products } = useAppContext();
+  const mainImage =
+    productImages[selectedImageIndex] ||
+    productImages[0] ||
+    "/images/placeholder.png";
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
+  const isAddedToCart = cartItems.some((item) => {
+    const cartProductId =
+      typeof item.productId === "object" ? item.productId?._id : item.productId;
 
-        const { data } = await axiosInstance.get(`/products/${_id}`);
+    return (
+      (item._id === product?._id || cartProductId === product?._id) &&
+      item.size === selectedSize
+    );
+  });
 
-        const fetchedProduct = data.product || data;
-
-        if (!fetchedProduct?._id) {
-          setProduct(null);
-          return;
-        }
-
-        setProduct(fetchedProduct);
-        setSelectedImageIndex(0);
-      } catch (error) {
-        console.error(error);
-        setProduct(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (_id) {
-      fetchProduct();
-    }
-  }, [_id]);
-
-  const productImages = Array.isArray(product?.image) ? product.image : [];
-
-  const handleWishlist = (e, product) => {
+  const handleWishlist = async (e, product) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    const success = addToWishlist(product);
+    const success = await addToWishlist(product);
 
     if (!success) {
       setTimeout(() => {
@@ -78,78 +70,39 @@ const ProductPage = () => {
     }
   };
 
-  const addToCart = (productId) => {
-    if (!selectedSize) {
-      toast.warning("Please Select a Size");
+  const handleAddToCart = async () => {
+    if (isAddedToCart) {
+      navigate("/cart");
       return;
     }
 
-    if (!user) {
-      toast.error("Please login first");
+    const success = await addToCart(product, selectedSize);
 
+    if (!success && !user) {
       setTimeout(() => {
         navigate("/signup?mode=login");
       }, 500);
-
-      return;
-    }
-
-    const alreadyInCart = cartItems.find(
-      (item) => item._id === productId && item.size === selectedSize,
-    );
-
-    if (alreadyInCart) {
-      setCartItems((prevItems) =>
-        prevItems.map((item) =>
-          item._id === productId && item.size === selectedSize
-            ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
-            : item,
-        ),
-      );
-
-      toast.info("Product updated");
-    } else {
-      setCartItems((prev) => [
-        ...prev,
-        {
-          ...product,
-          quantity: 1,
-          size: selectedSize,
-          createdAt: new Date().toISOString(),
-        },
-      ]);
-
-      toast.success("Product added to cart");
     }
   };
 
-  // if (loading) {
-  //   return (
-  //     <Container>
-  //       <Loading text="Loading product..." />
-  //     </Container>
-  //   );
-  // }
+  // const handleAddToCart = async () => {
+  //   const success = await addToCart(product, selectedSize);
 
-  // if (!product) {
-  //   return (
-  //     <Container>
-  //       <div className="py-20 text-center text-gray-500">Product not found</div>
-  //     </Container>
-  //   );
-  // }
+  //   if (!success && !user) {
+  //     setTimeout(() => {
+  //       navigate("/signup?mode=login");
+  //     }, 500);
+  //   }
+  // };
 
   return (
     <Container>
       <div className="transition-opacity duration-500 ease-in border-t-2 border-gray-200 opacity-100 pt-10">
-        {loading ? (
+        {isLoading ? (
           <div className="flex-1">
             <Loading text="Loading product..." />
           </div>
-        ) : !product ? (
+        ) : isError || !product?._id ? (
           <div className="flex min-h-[36vh] items-center justify-center">
             <p className="col-span-full text-center text-gray-500">
               Product not found
@@ -166,7 +119,10 @@ const ProductPage = () => {
                       src={image}
                       alt={product.name}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer ${selectedImageIndex === index
+
+                      // className="w-[24%] h-28 sm:w-full sm:h-42 object-cover sm:mb-3 flex-shrink-0 cursor-pointer"
+
+                      className={`w-[24%] h-28 sm:w-full sm:h-38 object-contain bg-gray-100 p-1 cursor-pointer ${selectedImageIndex === index
                         ? "border-2 border-gray-600 p-2"
                         : ""
                         }`}
@@ -189,16 +145,23 @@ const ProductPage = () => {
                     />
                   </button>
 
-                  <img
-                    src={
-                      productImages[selectedImageIndex] ||
-                      productImages[0] ||
-                      "/images/placeholder.png"
-                    }
+
+                  <div className="w-full h-125 sm:h-152 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <img
+                      src={mainImage}
+                      alt={product.name}
+                      onClick={() => setIsImageModalOpen(true)}
+                      className="max-w-full max-h-full object-contain cursor-pointer"
+                    />
+                  </div>
+
+                  {/* <img
+                    src={mainImage}
                     alt={product.name}
                     onClick={() => setIsImageModalOpen(true)}
-                    className="w-full h-auto"
-                  />
+                    className="w-full h-125 sm:h-177 object-cover rounded-lg cursor-pointer"
+                    // className="w-full h-auto"
+                  /> */}
                 </div>
               </div>
 
@@ -237,12 +200,13 @@ const ProductPage = () => {
                 </div>
 
                 <Button
-                  onClick={() => addToCart(product._id)}
+                  onClick={handleAddToCart}
                   size="medium"
                   type="primary"
                   className="w-[28vh]"
                 >
-                  ADD TO CART
+                  {isAddedToCart ? "GO TO CART" : "ADD TO CART"}
+                  {/* ADD TO CART */}
                 </Button>
 
                 <hr className="mt-8 sm:w-4/5 text-gray-200" />
@@ -300,15 +264,13 @@ const ProductPage = () => {
             </div>
           </div>
         )}
-
-        <RelatedProducts
-          productId={product?._id}
-          category={product?.category}
-          subCategory={product?.subCategory}
-        />
       </div>
 
-
+      <RelatedProducts
+        productId={product?._id}
+        category={product?.category}
+        subCategory={product?.subCategory}
+      />
 
       {isImageModalOpen && (
         <div
@@ -317,7 +279,8 @@ const ProductPage = () => {
         >
           <button
             onClick={() => setIsImageModalOpen(false)}
-            className="absolute top-8 right-90 text-white text-4xl"
+            className="absolute top-6 right-4 sm:top-8 sm:right-20 z-50 text-white cursor-pointer"
+          // className="absolute top-8 right-90 text-white text-4xl"
           >
             <X />
           </button>
@@ -330,14 +293,13 @@ const ProductPage = () => {
             }
             alt={product?.name}
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] max-w-[85vw] object-contain"
+            className="h-[85vh] w-auto max-w-[95vw] object-contain rounded-lg"
+          // className="max-h-[85vh] max-w-[85vw] object-contain"
           />
         </div>
       )}
-
     </Container>
   );
 };
 
 export default ProductPage;
-

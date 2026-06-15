@@ -1,81 +1,142 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { axiosInstance } from "../utils/axios";
 import { useAppContext } from "../context/AppContext";
 
 import Container from "../layout/Container";
 import Button from "../components/Button";
 import Input from "../components/Input";
-
+import { useMutation } from "@tanstack/react-query";
+import { loginUserApi, signupUser } from "../services/authService";
 
 const SignUpPage = () => {
   const { togglePassword, isPasswordHidden, loginUser } = useAppContext();
-  // const { togglePassword, isPasswordHidden, setUser } = useAppContext();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [isLoginOpen, setisLoginOpen] = useState(
     searchParams.get("mode") === "login",
   );
-  // const [isLoginOpen, setisLoginOpen] = useState(false);
+
+  const signupMutation = useMutation({
+    mutationFn: signupUser,
+    onSuccess: (data) => {
+      localStorage.setItem("token", data.token);
+      loginUser(data.user);
+
+      toast.success(data.message);
+      setFormData({ name: "", email: "", password: "" });
+      navigate("/");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Signup failed");
+    },
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: loginUserApi,
+    onSuccess: (data) => {
+      localStorage.setItem("token", data.token);
+      loginUser(data.user);
+
+      toast.success("Login successful!!");
+      navigate("/");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Login failed");
+    },
+  });
 
   const inputChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
     }));
   };
 
-  const submitForm = async (e) => {
+  const submitForm = (e) => {
     e.preventDefault();
-    setIsLoading(true);
 
     if (!formData.name || !formData.email || !formData.password) {
       toast.warning("Please fill all fields");
-      setIsLoading(false);
       return;
     }
 
     const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
     if (!gmailRegex.test(formData.email)) {
       toast.warning("Only Gmail addresses are allowed");
-      setIsLoading(false);
       return;
     }
 
-    try {
-      const { data } = await axiosInstance.post("/users/signup", formData);
-
-      localStorage.setItem("token", data.token);
-      loginUser(data.user);
-
-      // localStorage.setItem("token", data.token);
-      // localStorage.setItem("user", JSON.stringify(data.user));
-      // setUser(data.user);
-
-      toast.success(data.message);
-      navigate("/");
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Signup failed");
-    } finally {
-      setFormData({ name: "", email: "", password: "" });
-      setIsLoading(false);
-    }
+    signupMutation.mutate(formData);
   };
+
+  const submitLoginForm = (e) => {
+    e.preventDefault();
+
+    const { email, password } = formData;
+
+    if (!email || !password) {
+      toast.warning("Please fill all fields");
+      return;
+    }
+
+    loginMutation.mutate({
+      email,
+      password,
+    });
+  };
+
+  const placeholders = ["John Doe", "hello@gmail.com", "password"];
+  const fieldNames = ["name", "email", "password"];
+
+  // const { togglePassword, isPasswordHidden, loginUser } = useAppContext();
+
+  // const [formData, setFormData] = useState({
+  //   name: "",
+  //   email: "",
+  //   password: "",
+  // });
+  // // const [isLoading, setIsLoading] = useState(false);
+  // const navigate = useNavigate();
+  // const [searchParams] = useSearchParams();
+
+  // const [isLoginOpen, setisLoginOpen] = useState(
+  //   searchParams.get("mode") === "login",
+  // );
+  // // const [isLoginOpen, setisLoginOpen] = useState(false);
+
+  // const inputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     [name]: value,
+  //   }));
+  // };
 
   // const submitForm = async (e) => {
   //   e.preventDefault();
   //   setIsLoading(true);
+
   //   if (!formData.name || !formData.email || !formData.password) {
   //     toast.warning("Please fill all fields");
+  //     setIsLoading(false);
+  //     return;
+  //   }
+
+  //   const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  //   if (!gmailRegex.test(formData.email)) {
+  //     toast.warning("Only Gmail addresses are allowed");
   //     setIsLoading(false);
   //     return;
   //   }
@@ -84,12 +145,10 @@ const SignUpPage = () => {
   //     const { data } = await axiosInstance.post("/users/signup", formData);
 
   //     localStorage.setItem("token", data.token);
-  //     localStorage.setItem("user", JSON.stringify(data.user));
-  //     setUser(data.user);
+  //     loginUser(data.user);
 
   //     toast.success(data.message);
-
-  //     navigate("/"); // redirect to dashboard/home
+  //     navigate("/");
   //   } catch (error) {
   //     toast.error(error?.response?.data?.message || "Signup failed");
   //   } finally {
@@ -98,67 +157,38 @@ const SignUpPage = () => {
   //   }
   // };
 
-  // const submitForm = async (e) => {
+  // const submitLoginForm = async (e) => {
   //   e.preventDefault();
-  //   setIsLoading(true);
-  //   if (!formData.name || !formData.email || !formData.password) {
+  //   const { email, password } = formData;
+  //   if (!email || !password) {
   //     toast.warning("Please fill all fields");
   //     setIsLoading(false);
   //     return;
   //   }
-
+  //   setIsLoading(true);
   //   try {
-  //     const response = await axiosInstance.post("/users/signup", formData);
-  //     toast.success(response.data.message);
-  //     console.log(response.data);
+  //     const { data } = await axiosInstance.post("/users/login", {
+  //       email,
+  //       password,
+  //     });
+
+  //     localStorage.setItem("token", data.token);
+  //     loginUser(data.user);
+
+  //     toast.success("Login successful!!");
+
+  //     if (data) {
+  //       navigate("/");
+  //     }
   //   } catch (error) {
-  //     toast.error(error?.response?.data?.message || "Signup failed");
+  //     console.error("Login error", error);
+  //     toast.error(error?.response?.data?.message || "Login failed");
+  //   } finally {
+  //     setIsLoading(false);
   //   }
-
-  //   setFormData({
-  //     name: "",
-  //     email: "",
-  //     password: "",
-  //   });
-  //   setIsLoading(false);
   // };
-
-  const submitLoginForm = async (e) => {
-    e.preventDefault();
-    const { email, password } = formData;
-    if (!email || !password) {
-      toast.warning("Please fill all fields");
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const { data } = await axiosInstance.post("/users/login", {
-        email,
-        password,
-      });
-
-      localStorage.setItem("token", data.token);
-      loginUser(data.user);
-      // localStorage.setItem("token", data.token);
-      // localStorage.setItem("user", JSON.stringify(data.user));
-      // setUser(data.user);
-
-
-      toast.success("Login successful!!");
-
-      if (data) {
-        navigate("/");
-      }
-    } catch (error) {
-      console.error("Login error", error);
-      toast.error(error?.response?.data?.message || "Login failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const placeholders = ["John Doe", "hello@gmail.com", "password"];
-  const fieldNames = ["name", "email", "password"];
+  // const placeholders = ["John Doe", "hello@gmail.com", "password"];
+  // const fieldNames = ["name", "email", "password"];
 
   return (
     <Container>
@@ -208,12 +238,16 @@ const SignUpPage = () => {
                 Forgot your password?
               </p>
             </Link>
-            <p className="cursor-pointer  hover:text-blue-600" onClick={() => setisLoginOpen(true)}>
+            <p
+              className="cursor-pointer  hover:text-blue-600"
+              onClick={() => setisLoginOpen(true)}
+            >
               Login here
             </p>
           </div>
           <Button
-            loading={isLoading}
+            loading={signupMutation.isPending}
+            disabled={signupMutation.isPending}
             type="primary"
             className="mt-4 font-light"
             buttonType="submit"
@@ -267,12 +301,16 @@ const SignUpPage = () => {
             <p className="cursor-pointer hover:text-blue-600">
               <Link to="/forgot-password">Forgot your password?</Link>
             </p>
-            <p className="cursor-pointer  hover:text-blue-600" onClick={() => setisLoginOpen(false)}>
+            <p
+              className="cursor-pointer  hover:text-blue-600"
+              onClick={() => setisLoginOpen(false)}
+            >
               Create a new account
             </p>
           </div>
           <Button
-            loading={isLoading}
+            loading={loginMutation.isPending}
+            disabled={loginMutation.isPending}
             size="small"
             buttonType="submit"
             className="mt-4 font-light"
