@@ -17,12 +17,19 @@ const ContactPage = () => {
         <div className="flex flex-col justify-center gap-6 items-start">
           <p className="text-gray-600 font-semibold text-xl">Our Store</p>
           <p className="text-gray-500">
+            ShopWear
+            <br />
+            42 Park Street
+            <br />
+            Kolkata, West Bengal 700016, India
+          </p>
+          {/* <p className="text-gray-500">
             ShopWear 354 Fashion Lane
             <br></br>
             Los Angeles, SC 45678, USA
-          </p>
+          </p> */}
           <p className="text-gray-500">
-            Tel: (+11)-558-669-447
+            Tel: (+91) 9876-543-210
             <br></br>
             Email: contact.shopwear@info.com
           </p>
