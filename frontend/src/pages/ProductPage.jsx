@@ -266,11 +266,20 @@ const ProductPage = () => {
         )}
       </div>
 
-      <RelatedProducts
+      {product?._id && (
+        <RelatedProducts
+          productId={product._id}
+          category={product.category}
+          subCategory={product.subCategory}
+        />
+      )}
+
+
+      {/* <RelatedProducts
         productId={product?._id}
         category={product?.category}
         subCategory={product?.subCategory}
-      />
+      /> */}
 
       {isImageModalOpen && (
         <div
