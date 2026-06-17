@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 
 import Container from "../layout/Container";
@@ -61,7 +62,8 @@ const CartPage = () => {
                   key={`${item._id}-${item.size}`}
                   className="border-t border-b border-gray-200 py-4 text-gray-700 grid grid-cols-[4fr_1fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] gap-4 items-center"
                 >
-                  <div className="flex items-start gap-6">
+                  <Link to={`/products/${item._id}`}
+                    className="flex items-start gap-6">
                     <div className="w-16 h-20 sm:w-20 sm:h-24 bg-gray-100 flex items-center justify-center rounded">
                       <img
                         src={imageUrl}
@@ -88,7 +90,7 @@ const CartPage = () => {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
 
                   <Input
                     htmlType="number"
