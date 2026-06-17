@@ -32,6 +32,7 @@ const Button = ({
     <button
       onClick={disabled ? undefined : onClick}
       className={cn(
+        "inline-flex items-center justify-center gap-2",
         baseStyles,
         typeStyles[type],
         buttonSizes[size || "medium"],

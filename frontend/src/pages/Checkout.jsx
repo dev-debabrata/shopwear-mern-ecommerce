@@ -12,11 +12,15 @@ import { useNavigate } from "react-router-dom";
 import { createRazorpayOrder } from "../services/paymentService";
 import { createOrder } from "../services/orderService";
 import Address from "../components/Address";
+import Loading from "../components/Loading";
 
 const Checkout = () => {
   const { subTotal, cartItems, clearCart } = useAppContext();
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [buttonLoading, setButtonLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -68,6 +72,8 @@ const Checkout = () => {
     return true;
   };
 
+
+
   const handleRazorpayPayment = async () => {
     try {
       if (!/^[6-9]\d{9}$/.test(formData.mobile)) {
@@ -94,11 +100,22 @@ const Checkout = () => {
         },
 
         handler: async function (response) {
-          const success = await saveOrder("paid", response);
+          try {
+            setPageLoading(true);
 
-          if (success) {
-            toast.success("Payment Successful");
-            navigate("/order-success");
+            const success = await saveOrder("paid", response);
+
+            if (success) {
+              toast.success("Payment Successful");
+
+              setTimeout(() => {
+                navigate("/order-success", { replace: true });
+              }, 700);
+            }
+          } catch (error) {
+            console.log(error);
+            toast.error("Order save failed");
+            setPageLoading(false);
           }
         },
 
@@ -118,11 +135,72 @@ const Checkout = () => {
     } catch (error) {
       console.log("Payment error:", error);
       toast.error(error?.response?.data?.message || "Payment Failed");
+      setButtonLoading(false);
+      setPageLoading(false);
     }
   };
 
+
+  // const handleRazorpayPayment = async () => {
+  //   try {
+  //     if (!/^[6-9]\d{9}$/.test(formData.mobile)) {
+  //       toast.error("Please enter a valid Indian mobile number");
+  //       return;
+  //     }
+
+  //     const totalAmount = subTotal + shippingFee;
+  //     const data = await createRazorpayOrder(totalAmount);
+
+  //     const options = {
+  //       key: data.key,
+  //       amount: data.order.amount,
+  //       currency: data.order.currency,
+  //       name: "ShopWear Store",
+  //       description: "Order Payment",
+  //       order_id: data.order.id,
+
+  //       method: {
+  //         upi: true,
+  //         card: true,
+  //         netbanking: true,
+  //         wallet: true,
+  //       },
+
+  //       handler: async function (response) {
+  //         const success = await saveOrder("paid", response);
+
+  //         if (success) {
+  //           toast.success("Payment Successful");
+  //           navigate("/order-success");
+  //         }
+  //       },
+
+  //       prefill: {
+  //         name: `${formData.firstName} ${formData.lastName}`,
+  //         email: formData.emailAddress,
+  //         contact: `91${formData.mobile}`,
+  //       },
+
+  //       theme: {
+  //         color: "#000000",
+  //       },
+  //     };
+
+  //     const razorpay = new window.Razorpay(options);
+  //     razorpay.open();
+  //   } catch (error) {
+  //     console.log("Payment error:", error);
+  //     toast.error(error?.response?.data?.message || "Payment Failed");
+  //   }
+  // };
+
+
+
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
+
+    if (buttonLoading || pageLoading) return;
 
     if (cartItems.length === 0) {
       toast.error("Your cart is empty");
@@ -134,24 +212,36 @@ const Checkout = () => {
       return;
     }
 
-    // if (!formData.mobile || !formData.street) {
-    //   toast.error("Please select or add delivery address");
-    //   return;
-    // }
-
     if (paymentMethod === "cod") {
-      const success = await saveOrder("pending");
+      try {
+        setButtonLoading(true);
 
-      if (success) {
-        toast.success("Order placed successfully");
-        navigate("/order-success");
+        const success = await saveOrder("pending");
+
+        if (success) {
+          toast.success("Order placed successfully");
+
+          setButtonLoading(false);
+          setPageLoading(true);
+
+          setTimeout(() => {
+            navigate("/order-success", { replace: true });
+          }, 700);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Order failed");
+        setButtonLoading(false);
+        setPageLoading(false);
       }
 
       return;
     }
 
     if (paymentMethod === "razorpay") {
+      setButtonLoading(true);
       await handleRazorpayPayment();
+      setButtonLoading(false);
       return;
     }
 
@@ -159,6 +249,58 @@ const Checkout = () => {
       toast.info("Stripe payment is not added yet");
     }
   };
+
+  // const handlePlaceOrder = async (e) => {
+  //   e.preventDefault();
+
+  //   if (cartItems.length === 0) {
+  //     toast.error("Your cart is empty");
+  //     return;
+  //   }
+
+  //   if (!formData._id || !formData.mobile || !formData.street) {
+  //     toast.error("Please select or add delivery address");
+  //     return;
+  //   }
+
+  //   // if (!formData.mobile || !formData.street) {
+  //   //   toast.error("Please select or add delivery address");
+  //   //   return;
+  //   // }
+
+  //   if (paymentMethod === "cod") {
+  //     const success = await saveOrder("pending");
+
+  //     if (success) {
+  //       toast.success("Order placed successfully");
+  //       navigate("/order-success");
+  //     }
+
+  //     return;
+  //   }
+
+  //   if (paymentMethod === "razorpay") {
+  //     await handleRazorpayPayment();
+  //     return;
+  //   }
+
+  //   if (paymentMethod === "stripe") {
+  //     toast.info("Stripe payment is not added yet");
+  //   }
+  // };
+
+
+  if (pageLoading) {
+    return (
+      <Container>
+        <div className="flex min-h-[70vh] items-center justify-center">
+          <Loading text="Processing your order..." />
+        </div>
+      </Container>
+    );
+  }
+
+
 
   return (
     <Container>
@@ -210,6 +352,7 @@ const Checkout = () => {
               <PaymentMethods
                 paymentMethod={paymentMethod}
                 setPaymentMethod={setPaymentMethod}
+                isPlacingOrder={buttonLoading}
               />
             </div>
           </div>

@@ -3,12 +3,13 @@ import Button from "./Button";
 import stripeLogo from "../assets/stripe_logo.png";
 import razorpay from "../assets/razorpay_logo.png";
 
-const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
+const PaymentMethods = ({ paymentMethod, setPaymentMethod, isPlacingOrder = false, }) => {
   return (
     <div>
       <div className="flex flex-col lg:flex-row gap-3">
         <div
-          onClick={() => setPaymentMethod("stripe")}
+          onClick={() => !isPlacingOrder && setPaymentMethod("stripe")}
+          // onClick={() => setPaymentMethod("stripe")}
           className="flex items-center gap-3 p-2 px-3 cursor-pointer border border-gray-300"
         >
           <p
@@ -21,7 +22,8 @@ const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
 
 
         <div
-          onClick={() => setPaymentMethod("razorpay")}
+          onClick={() => !isPlacingOrder && setPaymentMethod("razorpay")}
+          // onClick={() => setPaymentMethod("razorpay")}
           className="flex items-center gap-3 p-2 px-3 cursor-pointer border border-gray-300"
         >
           <p
@@ -33,7 +35,8 @@ const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
         </div>
 
         <div
-          onClick={() => setPaymentMethod("cod")}
+          onClick={() => !isPlacingOrder && setPaymentMethod("cod")}
+          // onClick={() => setPaymentMethod("cod")}
           className="flex items-center gap-3 p-2 px-3 cursor-pointer border border-gray-300"
         >
           <p
@@ -53,10 +56,20 @@ const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
           buttonType="submit"
           type="primary"
           size="large"
+          disabled={isPlacingOrder}
+          loading={isPlacingOrder}
+          className="px-16 text-sm active:bg-gray-800 rounded-none disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isPlacingOrder ? "PROCESSING..." : "PLACE ORDER"}
+        </Button>
+        {/* <Button
+          buttonType="submit"
+          type="primary"
+          size="large"
           className="px-16 text-sm active:bg-gray-800 rounded-none"
         >
           PLACE ORDER
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
