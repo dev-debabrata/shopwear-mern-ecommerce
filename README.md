@@ -100,3 +100,111 @@ ShopWear/
 │
 └── README.md
 ```
+
+---
+
+## 🔧 Installation
+
+### Clone Repository
+
+- git clone https://github.com/your-username/shopwear-mern-ecommerce.git
+- cd shopwear-mern-ecommerce
+- Backend Setup
+
+```
+cd backend
+npm install
+npm run dev
+```
+
+- Frontend Setup
+
+```
+cd frontend
+npm install
+npm run dev
+```
+
+- Admin Setup
+
+```
+cd admin
+npm install
+npm run dev
+```
+
+## 🔐 Authentication & Security
+
+- JWT Authentication
+- Password Hashing with Bcrypt
+- Protected Routes
+- Admin Authorization
+- Secure API Access
+
+---
+
+### ☁️ Cloudinary Integration
+
+The application uses Cloudinary and Multer for:
+
+- Product Image Uploads
+- Cloud-Based Storage
+- Fast Image Delivery
+- Optimized Media Management
+
+---
+
+## 📦 Core Modules
+
+- User Management
+- Product Management
+- Shopping Cart
+- Order Processing
+- Admin Dashboard
+- Image Upload System
+
+---
+
+## 🎯 Learning Outcomes
+
+Through this project, I gained practical experience in:
+
+- Full-Stack Web Development
+- REST API Development
+- Database Design with MongoDB
+- Authentication & Authorization
+- Cloudinary Media Management
+- State Management in React
+- Deployment & Production Configuration
+
+---
+
+## 👨‍💻 Developer
+
+- Debabrata Das
+
+- B.Tech – Computer Science & Engineering
+
+- Frontend Developer | MERN Stack Developer
+
+- GitHub: https://github.com/dev-debabrata
+
+---
+
+## ⭐ Acknowledgements
+
+This project was developed as a Final Year College Project to demonstrate practical implementation of modern web development technologies using the MERN Stack.
+
+---
+
+## 📄 License
+
+This project is developed for educational and academic purposes.
+
+### Recommended Repository Name
+
+**shopwear-mern-ecommerce**
+
+### Recommended About Section
+
+\*\*🛍️ Final Year College Project — A full-stack MERN E-Commerce platform with React, Node.js, Express, MongoDB,
