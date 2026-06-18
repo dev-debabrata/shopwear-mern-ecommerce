@@ -1,66 +1,53 @@
-# 🛍️ ShopWear - MERN E-Commerce Platform
+# 🛍️ ShopWear
 
-ShopWear is a full-stack MERN E-Commerce application that provides a seamless online shopping experience for customers and a powerful admin dashboard for store management. The platform supports product management, secure authentication, shopping cart functionality, order processing, and image uploads through Cloudinary.
+A full-stack MERN E-Commerce Platform developed as a **Final Year College Project**. ShopWear provides a complete online shopping experience with secure authentication, product management, cart functionality, order processing, and an admin dashboard for store management.
 
-<!-- ## 🚀 Live Demo
+## 🎓 Academic Project
 
-### Customer Website
+**Project Title:** ShopWear – MERN E-Commerce Platform
 
-https://your-frontend-url.com
+**Project Type:** Final Year College Project
 
-### Admin Dashboard
+**Technology Stack:** MERN Stack (MongoDB, Express.js, React.js, Node.js)
 
-https://your-admin-url.com -->
-
-## 📸 Screenshots
-
-Add screenshots of:
-
-- Home Page
-- Product Collection Page
-- Product Details Page
-- Cart Page
-- Admin Dashboard
-- Product Management
+**Objective:**  
+To develop a modern and scalable e-commerce platform that enables customers to browse products, manage carts, place orders, and allows administrators to efficiently manage products and orders through a dedicated dashboard.
 
 ---
 
-## ✨ Features
+## 🚀 Features
 
 ### 👤 User Features
 
 - User Registration & Login
-- JWT Authentication
+- Secure JWT Authentication
 - Browse Products
 - Product Search & Filtering
 - Product Details Page
 - Add to Cart
 - Update Cart Quantity
-- Remove Products from Cart
+- Remove Items from Cart
 - Place Orders
 - Order History
-- Responsive Design
-- Secure Checkout Process
+- Responsive User Interface
 
 ### 🛠️ Admin Features
 
-- Admin Authentication
+- Secure Admin Login
 - Dashboard Overview
 - Add New Products
-- Update Existing Products
+- Edit Products
 - Delete Products
-- Manage Product Inventory
-- View Customer Orders
+- Manage Orders
 - Update Order Status
-- Manage Product Images
-- Real-Time Product Management
+- Product Inventory Management
 
-### ☁️ Media Management
+### ☁️ Image Management
 
-- Image Upload using Multer
-- Cloudinary Integration
-- Optimized Image Storage
-- Multiple Product Images Support
+- Product Image Upload
+- Multer Integration
+- Cloudinary Storage
+- Optimized Image Delivery
 
 ---
 
@@ -78,8 +65,6 @@ Add screenshots of:
 
 - Node.js
 - Express.js
-- MongoDB
-- Mongoose
 - JWT Authentication
 - Bcrypt.js
 - Multer
@@ -88,42 +73,30 @@ Add screenshots of:
 ### Database
 
 - MongoDB Atlas
-
-### Deployment
-
-- Vercel (Frontend/Admin)
-- Render (Backend)
+- Mongoose
 
 ---
 
-## 📂 Project Structure
+## 📁 Project Structure
 
-```
-
+```text
 ShopWear/
 │
 ├── frontend/
-│ ├── src/
-│ ├── public/
-│ └── package.json
+│   ├── src/
+│   └── public/
 │
 ├── admin/
-│ ├── src/
-│ ├── public/
-│ └── package.json
+│   ├── src/
+│   └── public/
 │
 ├── backend/
-│ ├── config/
-│ ├── controllers/
-│ ├── middleware/
-│ ├── models/
-│ ├── routes/
-│ ├── utils/
-│ ├── server.js
-│ └── package.json
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   └── utils/
 │
 └── README.md
-
 ```
-
----
