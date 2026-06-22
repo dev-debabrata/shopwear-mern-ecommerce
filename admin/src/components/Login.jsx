@@ -6,9 +6,12 @@ import { toast } from "react-toastify";
 const Login = ({ setToken }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
+    setLoading(true);
 
     try {
       const { data } = await axios.post(`${backendUrl}/api/admin/login`, {
@@ -22,16 +25,18 @@ const Login = ({ setToken }) => {
         toast.success(data.message);
       } else {
         toast.error(data.message);
+        setLoading(false);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center w-full">
-      <div className="bg-white shadow-md rounded-lg px-8 py-6 max-w-md">
-        <h1 className="text-2xl font-semibold mb-4">Admin Panel</h1>
+      <div className="bg-white shadow-md rounded-lg px-8 py-6 max-w-md border border-gray-200">
+        <h1 className="text-2xl text-center font-semibold mb-6">Admin Panel</h1>
 
         <form onSubmit={onSubmitHandler}>
           <div className="mb-3 min-w-72">
@@ -64,10 +69,18 @@ const Login = ({ setToken }) => {
 
           <button
             type="submit"
+            disabled={loading}
+            className="mt-2 w-full py-2 px-4 rounded-md text-white bg-black shadow-md disabled:opacity-70"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+
+          {/* <button
+            type="submit"
             className="mt-2 w-full py-2 px-4 rounded-md text-white bg-black shadow-md"
           >
             Login
-          </button>
+          </button> */}
         </form>
       </div>
     </div>
