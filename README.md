@@ -23,6 +23,7 @@ To develop a modern and scalable e-commerce platform that enables customers to b
   <img src="./frontend/public/readme-img/login.png" alt="Login Page" width="45%" />
   <img src="./frontend/public/readme-img/signup.png" alt="SignUp Page" width="45%" />
   <img src="./frontend/public/readme-img/forgotPassword.png" alt="Forgot Password Page" width="45%" />
+  <img src="./frontend/public/readme-img/profile.png" alt="Profile Page" width="45%" />
 </p>
 
 ### Home Page, Collections Page, About Page & Contact Page
@@ -30,7 +31,7 @@ To develop a modern and scalable e-commerce platform that enables customers to b
 <p align="center">
   <img src="./frontend/public/readme-img/home.png" alt="Home Page" width="45%" />
   <img src="./frontend/public/readme-img/collection.png" alt="Collection Page" width="45%" />
-   <img src="./frontend/public/readme-img/about.png" alt="About Page" width="45%" />
+  <img src="./frontend/public/readme-img/about.png" alt="About Page" width="45%" />
   <img src="./frontend/public/readme-img/contact.png" alt="Contact Page" width="45%" />
 </p>
 
@@ -38,15 +39,28 @@ To develop a modern and scalable e-commerce platform that enables customers to b
 
 <p align="center">
   <img src="./frontend/public/readme-img/product.png" alt="Product Details" width="45%" />
-    <img src="./frontend/public/readme-img/wishlist.png" alt="Wishlist" width="45%" />
+  <img src="./frontend/public/readme-img/wishlist.png" alt="Wishlist" width="45%" />
   <img src="./frontend/public/readme-img/cart.png" alt="Shopping Cart" width="45%" />
   <img src="./frontend/public/readme-img/checkout.png" alt="Checkout" width="45%" />
 </p>
 
-### Admin Dashboard
+### Razorpay Payment Page, Order Success Page, Order History Page & Order Tracking Page
+
+<p align="center">
+  <img src="./frontend/public/readme-img/razorpay.png" alt="Razorpay Payment Page" width="45%" />
+  <img src="./frontend/public/readme-img/successOrder.png" alt="Order Success Page" width="45%" />
+  <img src="./frontend/public/readme-img/order.png" alt="Order History Page" width="45%" />
+  <img src="./frontend/public/readme-img/trackOrder.png" alt="Tracking Order Page" width="45%" />
+</p>
+
+### Admin Dashboard, Admin Product List Page, Admin Add Product Page, Admin Edit Product Page & Admin All Order List Page
 
 <p align="center">
   <img src="./screenshots/admin-dashboard.png" alt="Admin Dashboard" width="70%" />
+  <img src="./frontend/public/readme-img/adminProduct.png" alt="Admin Product List" width="70%" />
+  <img src="./frontend/public/readme-img/addProduct.png" alt="Admin Add Product" width="70%" />
+  <img src="./frontend/public/readme-img/productEdit.png" alt="Admin Edit Product" width="70%" />
+  <img src="./frontend/public/readme-img/adminOrders.png" alt="Admin Order List" width="70%" />
 </p>
 
 ---
@@ -143,7 +157,7 @@ ShopWear/
 
 ### Clone Repository
 
-- git clone https://github.com/your-username/shopwear-mern-ecommerce.git
+- git clone https://github.com/dev-debabrata/shopwear-ecommerce-mern.git
 - cd shopwear-mern-ecommerce
 
 ### Backend Setup
