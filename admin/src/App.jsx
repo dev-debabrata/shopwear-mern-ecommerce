@@ -9,6 +9,7 @@ import Add from "./pages/Add";
 import List from "./pages/List";
 import Orders from "./pages/Orders";
 import EditProduct from "./pages/EditProduct";
+import Dashboard from "./pages/Dashboard";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 export const currency = "₹";
@@ -32,7 +33,7 @@ const App = () => {
         <Login setToken={setToken} />
       ) : (
         <>
-          <Navbar setToken={setToken} />
+          <Navbar setToken={setToken} token={token} />
           <hr />
 
           <div className="flex w-full gap-10 h-[calc(100vh-73px)] overflow-hidden">
@@ -41,12 +42,15 @@ const App = () => {
             {/* <div className="py-5 w-full overflow-y-auto pr-4"> */}
             <div className="py-5 w-full min-w-0 overflow-y-auto pr-4">
               <Routes>
-                <Route path="/" element={<Navigate to="/list" replace />} />
+                {/* <Route path="/" element={<Navigate to="/list" replace />} /> */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard token={token} />} />
                 <Route path="/add" element={<Add token={token} />} />
                 <Route path="/edit/:id" element={<EditProduct token={token} />} />
                 <Route path="/list" element={<List token={token} />} />
                 <Route path="/orders" element={<Orders token={token} />} />
-                <Route path="*" element={<Navigate to="/list" replace />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                {/* <Route path="*" element={<Navigate to="/list" replace />} /> */}
               </Routes>
             </div>
           </div>

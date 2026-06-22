@@ -56,11 +56,11 @@ To develop a modern and scalable e-commerce platform that enables customers to b
 ### Admin Dashboard, Admin Product List Page, Admin Add Product Page, Admin Edit Product Page & Admin All Order List Page
 
 <p align="center">
-  <img src="./screenshots/admin-dashboard.png" alt="Admin Dashboard" width="45%" />
-  <img src="./frontend/public/readme-img/adminProduct.png" alt="Admin Product List" width="45%" />
-  <img src="./frontend/public/readme-img/addProduct.png" alt="Admin Add Product" width="45%" />
-  <img src="./frontend/public/readme-img/productEdit.png" alt="Admin Edit Product" width="45%" />
-  <img src="./frontend/public/readme-img/adminOrders.png" alt="Admin Order List" width="45%" />
+  <img src="./frontend/public/readme-img/adminDashboard.png" alt="Admin Dashboard" width="45%" />
+  <img src="./frontend/public/readme-img/adminProductList.png" alt="Admin Product List" width="45%" />
+  <img src="./frontend/public/readme-img/adminAddProduct.png" alt="Admin Add Product" width="45%" />
+  <img src="./frontend/public/readme-img/adminEditProduct.png" alt="Admin Edit Product" width="45%" />
+  <img src="./frontend/public/readme-img/adminOrderList.png" alt="Admin Order List" width="45%" />
 </p>
 
 ---
